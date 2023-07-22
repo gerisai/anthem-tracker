@@ -11,7 +11,7 @@ export default function ProgramsLayout({
     return (
       <>
       <NavBar/>
-      <Flex align="center" justify="center" w="100%" mx={8}>
+      <Flex align="center" justify="center" w="100%">
         {children}
       </Flex>
       </>
