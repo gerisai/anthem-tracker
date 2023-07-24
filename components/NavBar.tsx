@@ -11,7 +11,7 @@ export function NavBar() {
         <Stack direction="row">
             <Link href='/programs'><Button size="lg" color="white" variant="link" px={8}>Programas</Button></Link>
             <Link href='/programs/songs'><Button size="lg" color="white" variant="link" px={8}>Cantos</Button></Link>
-            <Button size="lg" color="white" variant="link" px={8}>Histórico</Button>
+            <Link href='/programs/history'><Button size="lg" color="white" variant="link" px={8}>Histórico</Button></Link>
         </Stack> 
         <Stack direction="row">
             <Button colorScheme="whiteAlpha" color="white" variant="outline" borderRadius="25px" leftIcon={<FcSettings/>}>Ajustes</Button>
