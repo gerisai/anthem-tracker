@@ -10,7 +10,7 @@ export function NavBar() {
     mb={8} p={8}>
         <Stack direction="row">
             <Link href='/programs'><Button size="lg" color="white" variant="link" px={8}>Programas</Button></Link>
-            <Link href='/programs/anthems'><Button size="lg" color="white" variant="link" px={8}>Cantos</Button></Link>
+            <Link href='/programs/songs'><Button size="lg" color="white" variant="link" px={8}>Cantos</Button></Link>
             <Button size="lg" color="white" variant="link" px={8}>Histórico</Button>
         </Stack> 
         <Stack direction="row">

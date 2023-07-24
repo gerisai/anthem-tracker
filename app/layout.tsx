@@ -5,8 +5,8 @@ import { Providers } from './providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Anthem Tracker',
-  description: 'Track usage for anthems',
+  title: 'Programación de Cantos',
+  description: 'Registro de cantos',
 }
 
 export default function RootLayout({
