@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { Flex, Stack, Button } from '@chakra-ui/react'
 import { FcSettings } from "react-icons/fc"
+import AuthCheck from '@/components/AuthCheck'
+import { SignInButton, SignOutButton } from '@/components/SessionButtons'
 
 export function NavBar() {
     return (
@@ -12,10 +14,12 @@ export function NavBar() {
             <Link href='/programs/current'><Button size="lg" color="white" variant="link" px={8}>Programas</Button></Link>
             <Link href='/programs/songs'><Button size="lg" color="white" variant="link" px={8}>Cantos</Button></Link>
             <Link href='/programs/history'><Button size="lg" color="white" variant="link" px={8}>Histórico</Button></Link>
-        </Stack> 
+        </Stack>
         <Stack direction="row">
-            <Button colorScheme="whiteAlpha" color="white" variant="outline" borderRadius="25px" leftIcon={<FcSettings/>}>Ajustes</Button>
-            <Button colorScheme="red">Cerrar Sesión</Button>
+            <SignInButton/>
+            <AuthCheck>
+                <SignOutButton/>
+            </AuthCheck>
         </Stack>
     </Flex>
     )
