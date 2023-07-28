@@ -3,10 +3,10 @@ import { Button, Image } from '@chakra-ui/react'
 
 
 export function SignInButton() {
-    const    { data: session, status } = useSession();
+    const { data: session, status } = useSession();
 
     if (status === 'loading') {
-        return <h1>Hi mom</h1>
+        return <Button isLoading colorScheme='teal' variant='solid' loadingText='Cargando'></Button>
     }
 
     if (status === 'authenticated') {
