@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
@@ -49,4 +49,25 @@ model User {
   bio           String?
   accounts      Account[]
   sessions      Session[]
+  programs      Program[]
+}
+
+model Song {
+  id        String     @id @default(cuid())
+  name      String
+  type      String
+  number    Int?
+  dates     DateTime[]
+  program   Program?   @relation(fields: [programId], references: [id])
+  programId String?
+}
+
+model Program {
+  id        String   @id @default(cuid())
+  songs     Song[]
+  type      String
+  date      DateTime
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  isCurrent Boolean
 }
