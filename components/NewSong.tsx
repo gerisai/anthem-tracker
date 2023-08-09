@@ -13,8 +13,8 @@ import {
     FormControl,
     FormLabel,
     Select
-} from '@chakra-ui/react'
-import { useState } from 'react'
+} from '@chakra-ui/react';
+import { useState } from 'react';
 
 export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose: any, btnRef: any }) {
   const [isLoading, setIsLoading ] = useState(false);
@@ -65,8 +65,8 @@ export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose:
             <FormControl isRequired mb={4}>
                 <FormLabel>Tipo</FormLabel>
                 <Select name='type'>
-                    <option value='Salmo'>Salmo</option>
-                    <option value='Canto'>Canto</option>
+                    <option value='salmo'>Salmo</option>
+                    <option value='santo'>Canto</option>
                 </Select>
             </FormControl>
           </DrawerBody>
