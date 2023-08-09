@@ -56,9 +56,9 @@ model Song {
   id        String     @id @default(cuid())
   name      String
   type      String
-  number    Int?
+  number    String?
   dates     DateTime[]
-  program   Program?   @relation(fields: [programId], references: [id])
+  programs  Program[]
   programId String?
 }
 
