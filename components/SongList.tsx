@@ -2,7 +2,7 @@
 
 import { Heading, List, ListItem, Badge, Tag, TagLabel, Highlight } from "@chakra-ui/react";
 
-export function Songs({ type, songs }: {type: string, songs: Array<any>}) {
+export function SongList({ type, songs }: {type: string, songs: Array<any>}) {
     const filteredSongs = songs.filter((song) => song.type === type.toLowerCase())
 
     return (

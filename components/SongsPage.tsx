@@ -1,7 +1,7 @@
 'use client'
 
 import { Flex, Tabs, TabList, Tab, TabPanels, TabPanel, Button, useDisclosure } from '@chakra-ui/react';
-import { Songs } from '@/components/Songs';
+import { SongList } from '@/components/SongList';
 import { NewSong } from '@/components/NewSong';
 import { BiPlus } from 'react-icons/bi';
 import { useRef } from 'react';
@@ -21,13 +21,13 @@ export function SongsPage({ songs }: { songs: any }) {
             </TabList>
             <TabPanels>
                 <TabPanel>
-                    <Songs type='Himno' songs={songs}/>
+                    <SongList type='Himno' songs={songs}/>
                 </TabPanel>
                 <TabPanel>
-                    <Songs type='Salmo' songs={songs}/>
+                    <SongList type='Salmo' songs={songs}/>
                 </TabPanel>
                 <TabPanel>
-                    <Songs type='Canto' songs={songs}/>
+                    <SongList type='Canto' songs={songs}/>
                 </TabPanel>
             </TabPanels>
             </Tabs>
