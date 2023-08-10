@@ -21,13 +21,13 @@ export function SongsPage({ songs }: { songs: any }) {
             </TabList>
             <TabPanels>
                 <TabPanel>
-                    <SongList type='Himno' songs={songs}/>
+                    <SongList addProgramSong={false} choosable={false} type='Himno' songs={songs}/>
                 </TabPanel>
                 <TabPanel>
-                    <SongList type='Salmo' songs={songs}/>
+                    <SongList addProgramSong={false} choosable={false} type='Salmo' songs={songs}/>
                 </TabPanel>
                 <TabPanel>
-                    <SongList type='Canto' songs={songs}/>
+                    <SongList addProgramSong={false} choosable={false} type='Canto' songs={songs}/>
                 </TabPanel>
             </TabPanels>
             </Tabs>
