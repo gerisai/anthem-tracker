@@ -65,7 +65,6 @@ model Song {
 model Program {
   id        String   @id @default(cuid())
   songs     Song[]
-  type      String
   date      DateTime
   user      User?    @relation(fields: [userId], references: [id])
   userId    String?
