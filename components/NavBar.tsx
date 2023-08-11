@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Flex, Stack, Button } from '@chakra-ui/react'
-import { FcSettings } from "react-icons/fc"
 import AuthCheck from '@/components/AuthCheck'
 import { SignInButton, SignOutButton } from '@/components/SessionButtons'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Heading, Divider, Highlight, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody } from '@chakra-ui/react'
+import { Heading, Divider, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody } from '@chakra-ui/react'
 import { BiPlus, BiSolidFileBlank, BiRevision } from "react-icons/bi";
 import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
