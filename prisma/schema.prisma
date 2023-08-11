@@ -49,24 +49,21 @@ model User {
   bio           String?
   accounts      Account[]
   sessions      Session[]
-  programs      Program[]
 }
 
 model Song {
-  id        String     @id @default(cuid())
-  name      String
-  type      String
-  number    String?
-  dates     DateTime[]
-  programs  Program[]
-  programId String?
+  id       String     @id @default(cuid())
+  name     String
+  type     String
+  number   String?
+  dates    DateTime[]
 }
 
 model Program {
   id        String   @id @default(cuid())
-  songs     Song[]
+  songs     String[]
+  type      String
   date      DateTime
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?
+  user      String
   isCurrent Boolean
 }

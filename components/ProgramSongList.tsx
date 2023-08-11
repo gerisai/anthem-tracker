@@ -18,7 +18,7 @@ export function ProgramSongList({ program, programSongs }:{ program: string, pro
     
     return (
         filteredSongs.map((song: any, i: number) => (
-            <Highlight query={(i+1).toString().split('').map((i) => emoji[i]).join('') + ' ' + song.name} styles={{ px: '3', py: '1', my:'2', rounded: 'full', bg: 'teal.100' }} >
+            <Highlight key={i} query={(i+1).toString().split('').map((i) => emoji[i]).join('') + ' ' + song.name} styles={{ px: '3', py: '1', my:'2', rounded: 'full', bg: 'teal.100' }} >
                 {(i+1).toString().split('').map((i) => emoji[i]).join('') + ' ' + song.name}
             </Highlight>
         ))

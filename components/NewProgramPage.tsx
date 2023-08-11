@@ -1,6 +1,6 @@
 'use client'
 
-import { Heading, Divider, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody } from '@chakra-ui/react'
+import { FormControl, FormLabel, Switch, Input, Heading, Divider, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody } from '@chakra-ui/react'
 import { BiPlus, BiSolidFileBlank, BiRevision } from "react-icons/bi";
 import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
@@ -9,6 +9,7 @@ import { useState } from 'react';
 export function NewProgramPage({ songs }: { songs: any }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [programSongs, setProgramSongs] = useState(new Array(0));
+  const [isLoading, setIsLoading ] = useState(false);
 
   const addProgramSong = (program: string, name: string) => {
     setProgramSongs([{name, program}, ...programSongs].reverse());
@@ -17,6 +18,38 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
   const clearPrograms = () => {
     setProgramSongs([]);
+  }
+
+  const createProgram = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    for (let programType of ['recibimiento', 'matutino', 'vespertino']) {
+      const filteredSongs = programSongs.filter((song) => song.program === programType);
+      const updatedSongs = filteredSongs.map((song) => song.name);
+
+      const body = {
+        date: formData.get('date'),
+        isCurrent: formData.get('isCurrent') ? true : false,
+        songs: updatedSongs,
+        type: programType,
+      };
+  
+      const res = await fetch('/api/program', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      await res.json();
+
+    }
+
+    setIsLoading(false);
   }
 
   return (
@@ -38,11 +71,24 @@ export function NewProgramPage({ songs }: { songs: any }) {
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
           <ProgramSongList program='vespertino' programSongs={programSongs}/>
         </Flex>
-        <Flex direction='row' alignItems="center" justify="center" mb={4}>
-          <Button size='lg' colorScheme='green' mt={4} mx={2} leftIcon={<BiSolidFileBlank/>}>Guardar</Button>
+        <form onSubmit={createProgram}>
+        <Flex direction='column' alignItems="center" justify="center" mb={4}>
+            <FormControl display='flex' alignItems='center' my={6} w='30%'>
+              <Input name='date' isRequired={true} variant='flushed' size="lg" type="date"/>
+            </FormControl>
+            <FormControl display='flex' alignItems='center' justifyContent='center' my={6}>
+              <FormLabel htmlFor='isCurrent' mb='0'>
+                Publicar programa?
+              </FormLabel>
+            <Switch name='isCurrent' colorScheme='yellow' size='lg' id='isCurrent'/>
+            </FormControl>
+        </Flex>
+        <Flex direction='row' alignItems="center" wrap="wrap" justify="center" mb={4}>
+          <Button size='lg' colorScheme='green' mt={4} mx={2} leftIcon={<BiSolidFileBlank/>} isLoading={isLoading} type='submit'>Guardar</Button>
           <Button size='lg' colorScheme='blue' mt={4} mx={2} leftIcon={<BiPlus/>} onClick={onOpen}>Agregar</Button>
           <Button size='lg' colorScheme='yellow' mt={4} mx={2} leftIcon={<BiRevision/>} onClick={clearPrograms}>Reiniciar</Button>
         </Flex>
+        </form>
     </Flex>
     <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="outside">
     <ModalOverlay />

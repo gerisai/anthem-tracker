@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Song" ALTER COLUMN "number" SET DATA TYPE TEXT;
