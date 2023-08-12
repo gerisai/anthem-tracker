@@ -29,8 +29,14 @@ export function NewProgramPage({ songs }: { songs: any }) {
   const addProgramSong = (program: string, song: any) => {
     programs[program].songs = [...programs[program].songs, song];
     
-    setPrograms(programs)
+    setPrograms(programs);
     onClose();
+  }
+
+  const deleteProgramSong = (program: string, song: any) => {
+    programs[program].songs = programs[program].songs.filter((s: any) => s.id !== song.id)
+    let newPrograms = Object.assign({},programs);
+    setPrograms(newPrograms);
   }
 
   const clearPrograms = () => {
@@ -75,17 +81,17 @@ export function NewProgramPage({ songs }: { songs: any }) {
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Recibimiento</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList programSongs={programs.recibimiento.songs}/>
+          <ProgramSongList programSongs={programs.recibimiento.songs} program='recibimiento' deleteProgramSong={deleteProgramSong}/>
         </Flex>
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Matutino</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList programSongs={programs.matutino.songs}/>
+          <ProgramSongList programSongs={programs.matutino.songs} program='matutino' deleteProgramSong={deleteProgramSong}/>
         </Flex>
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Vespertino</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList programSongs={programs.vespertino.songs}/>
+          <ProgramSongList programSongs={programs.vespertino.songs} program='vespertino' deleteProgramSong={deleteProgramSong}/>
         </Flex>
         <form onSubmit={createProgram}>
         <Flex direction='column' alignItems="center" justify="center" mb={4}>
