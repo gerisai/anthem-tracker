@@ -115,7 +115,7 @@ const anthems =
         dates: []
     },
     {
-        name: 'Cómo Águila',
+        name: 'Como Águila',
         type: 'canto',
         dates: []
     },
