@@ -6,18 +6,35 @@ import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
 
+const initialPrograms: any = {
+  recibimiento: {
+    type: 'recibimiento',
+    songs: []
+  },
+  matutino: {
+    type: 'matutino',
+    songs: []
+  },
+  vespertino: {
+    type: 'vespertino',
+    songs: []
+  },
+}
+
 export function NewProgramPage({ songs }: { songs: any }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [programSongs, setProgramSongs] = useState(new Array(0));
+  const [programs, setPrograms]: [any,any] = useState(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
 
-  const addProgramSong = (program: string, name: string) => {
-    setProgramSongs([{name, program}, ...programSongs].reverse());
+  const addProgramSong = (program: string, song: any) => {
+    programs[program].songs = [...programs[program].songs, song];
+    
+    setPrograms(programs)
     onClose();
   }
 
   const clearPrograms = () => {
-    setProgramSongs([]);
+    setPrograms(initialPrograms);
   }
 
   const createProgram = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -26,17 +43,16 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
     const formData = new FormData(e.currentTarget);
 
-    for (let programType of ['recibimiento', 'matutino', 'vespertino']) {
-      const filteredSongs = programSongs.filter((song) => song.program === programType);
-      const updatedSongs = filteredSongs.map((song) => song.name);
+    for (let programType in programs) {
 
       const body = {
+        ...programs[programType],
         date: formData.get('date'),
-        isCurrent: formData.get('isCurrent') ? true : false,
-        songs: updatedSongs,
-        type: programType,
+        isCurrent: formData.get('isCurrent') ? true : false
       };
-  
+
+      console.log(body)
+
       const res = await fetch('/api/program', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -59,17 +75,17 @@ export function NewProgramPage({ songs }: { songs: any }) {
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Recibimiento</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList program='recibimiento' programSongs={programSongs}/>
+          <ProgramSongList programSongs={programs.recibimiento.songs}/>
         </Flex>
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Matutino</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList program='matutino' programSongs={programSongs}/>
+          <ProgramSongList programSongs={programs.matutino.songs}/>
         </Flex>
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Vespertino</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList program='vespertino' programSongs={programSongs}/>
+          <ProgramSongList programSongs={programs.vespertino.songs}/>
         </Flex>
         <form onSubmit={createProgram}>
         <Flex direction='column' alignItems="center" justify="center" mb={4}>

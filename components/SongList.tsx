@@ -42,9 +42,9 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
                             <Badge colorScheme={color}>{repeats || 0}</Badge>
                         </Tag>
                         <MenuList background='gray.700' borderColor='gray.500'>
-                            <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('recibimiento',song.name)}>Recibimieto</MenuItem>
-                            <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('matutino',song.name)}>Matutino</MenuItem>
-                            <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('vespertino',song.name)}>Vespertino</MenuItem>
+                            <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('recibimiento',song)}>Recibimieto</MenuItem>
+                            <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('matutino',song)}>Matutino</MenuItem>
+                            <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('vespertino',song)}>Vespertino</MenuItem>
                         </MenuList>
                     </Menu>
                     </ListItem>
