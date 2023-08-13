@@ -15,6 +15,24 @@ export async function POST(req: Request) {
 
   data.date = new Date(data.date);
 
+  if (data.isCurrent) { // Update last current program to become old
+    const oldProgram = await prisma.program.findFirst({
+      where: {
+        isCurrent: true,
+        type: data.type
+      }
+    });
+
+    await prisma.program.update({
+      where: {
+        id: oldProgram!.id
+      },
+      data: {
+        isCurrent: false
+      }
+    })
+  }
+
   const program = await prisma.program.create({
     data: {
       type: data.type,
