@@ -1,4 +1,4 @@
-import { Highlight, Flex, Badge, Tag } from "@chakra-ui/react";
+import { Highlight, Flex, Tag } from "@chakra-ui/react";
 import { numberToEmoji } from '@/components/Emojis';
 import { BiTrash } from 'react-icons/bi';
 
