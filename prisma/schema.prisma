@@ -40,9 +40,9 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   age           Int?
@@ -50,6 +50,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   programs      Program[]
+  fullprograms  FullProgram[]
 }
 
 model Song {
@@ -62,11 +63,21 @@ model Song {
 }
 
 model Program {
-  id        String   @id @default(cuid())
-  songs     Song[]
-  type      String
+  id          String        @id @default(cuid())
+  songs       Song[]
+  type        String
+  date        DateTime
+  author      User          @relation(fields: [userId], references: [id])
+  isCurrent   Boolean
+  userId      String
+  fullprogram FullProgram[]
+}
+
+model FullProgram {
+  id        String    @id @default(cuid())
   date      DateTime
-  author    User     @relation(fields: [userId], references: [id])
+  programs  Program[]
+  author    User      @relation(fields: [userId], references: [id])
   isCurrent Boolean
   userId    String
 }

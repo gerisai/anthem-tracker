@@ -23,14 +23,17 @@ export async function POST(req: Request) {
       }
     });
 
-    await prisma.program.update({
-      where: {
-        id: oldProgram!.id
-      },
-      data: {
-        isCurrent: false
-      }
-    })
+
+    if (oldProgram) {
+      await prisma.program.update({
+        where: {
+          id: oldProgram!.id
+        },
+        data: {
+          isCurrent: false
+        }
+      })
+    }
   }
 
   const program = await prisma.program.create({

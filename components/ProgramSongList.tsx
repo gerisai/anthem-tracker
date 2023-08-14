@@ -9,7 +9,7 @@ export function ProgramSongList({ programSongs, program, deleteProgramSong }:{ p
             <Highlight key={i} query={`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`} styles={{ px: '3', py: '1', my:'2', rounded: 'full', bg: 'teal.100' }} >
                 {`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`}
             </Highlight>
-            <Tag as='button' size='lg' colorScheme='red' borderRadius='full' mx={2} onClick={() => deleteProgramSong(program,song)}><BiTrash/></Tag>
+            <Tag key={i} as='button' size='lg' colorScheme='red' borderRadius='full' mx={2} onClick={() => deleteProgramSong(program,song)}><BiTrash/></Tag>
             </Flex>
         ))
     )

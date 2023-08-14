@@ -25,6 +25,10 @@ export function NewProgramPage({ songs }: { songs: any }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [programs, setPrograms]: [any,any] = useState(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
+  const fullProgram = {
+    programs: new Array(0),
+    date: ''
+  }
 
   const addProgramSong = (program: string, song: any) => {
     programs[program].songs = [...programs[program].songs, song];
@@ -49,6 +53,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
     const formData = new FormData(e.currentTarget);
 
+    // Create individual programs
     for (let programType in programs) {
 
       const body = {
@@ -56,8 +61,6 @@ export function NewProgramPage({ songs }: { songs: any }) {
         date: formData.get('date'),
         isCurrent: formData.get('isCurrent') ? true : false
       };
-
-      console.log(body)
 
       const res = await fetch('/api/program', {
         method: 'POST',
@@ -67,9 +70,28 @@ export function NewProgramPage({ songs }: { songs: any }) {
         },
       });
   
-      await res.json();
+      const createdProgram = await res.json();
+
+      fullProgram.programs = [...fullProgram.programs, createdProgram.id]
 
     }
+
+    // Create full program
+    const body = {
+      date: formData.get('date'),
+      isCurrent: formData.get('isCurrent') ? true : false,
+      programs: fullProgram.programs
+    };
+
+    const res = await fetch('/api/fullprogram', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    await res.json();
 
     setIsLoading(false);
   }
