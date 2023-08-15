@@ -1,12 +1,14 @@
 'use client'
 
-import { Heading, List, ListItem, Badge, Tag, TagLabel, Menu, MenuList, MenuItem } from "@chakra-ui/react";
+import { Heading, List, ListItem, Badge, Tag, TagLabel, Menu, MenuList, MenuItem, Tooltip } from "@chakra-ui/react";
 import { MenuButtonSong } from '@/components/MenuButton';
 
 const repeatColors: any = {
     0: 'teal',
     1: 'yellow'
 }
+
+const options: any = { year: 'numeric', month: 'numeric' ,day: 'numeric' };
 
 const sortFns: any = {
     himno: (a: any, b: any) => Number(a.number) - Number(b.number), // numerical
@@ -45,9 +47,22 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
                                 <TagLabel>{song.name}</TagLabel>
                             </Tag>
                         </MenuButtonSong>
+                        <Tooltip placement='right' label={
+                            song.dates.map((d: any) => {
+                                return (
+                                    <>
+                                        {d.toLocaleDateString('es-MX',options)}
+                                        <br/>
+                                    </>
+                                )
+                            })
+                        }
+                        hasArrow
+                        offset={[0,20]}>
                         <Tag size='lg' borderRadius='full' variant='solid' colorScheme={color} mx={1}>
                             <Badge colorScheme={color}>{repeats || 0}</Badge>
                         </Tag>
+                        </Tooltip>
                         <MenuList background='gray.700' borderColor='gray.500'>
                             <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('recibimiento',song)}>Recibimieto</MenuItem>
                             <MenuItem background='gray.700' _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong('matutino',song)}>Matutino</MenuItem>

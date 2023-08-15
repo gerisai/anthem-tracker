@@ -7,7 +7,7 @@ export function SongRecord({ program }: { program:any }) {
     const options: any = { year: 'numeric', month: 'numeric' ,day: 'numeric' };
     
     return (
-    <Card background='teal.600' m={2}>
+    <Card background={ program.isCurrent ? 'yellow.600' : 'teal.600'} m={2}>
         <CardBody>
             <HStack>
                 <Text color='white'>{formatedDate.toLocaleDateString('es-MX',options)}</Text>
