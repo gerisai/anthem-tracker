@@ -5,6 +5,7 @@ import { BiPlus, BiSolidFileBlank, BiRevision } from "react-icons/bi";
 import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const initialPrograms: any = {
   recibimiento: {
@@ -22,6 +23,7 @@ const initialPrograms: any = {
 }
 
 export function NewProgramPage({ songs }: { songs: any }) {
+  const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [programs, setPrograms]: [any,any] = useState(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
@@ -94,6 +96,8 @@ export function NewProgramPage({ songs }: { songs: any }) {
     await res.json();
 
     setIsLoading(false);
+
+    router.push('/programs/history');
   }
 
   return (

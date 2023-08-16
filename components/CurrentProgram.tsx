@@ -5,9 +5,11 @@ import { BiPlus, BiPencil, BiTrash } from "react-icons/bi";
 import AuthCheck from '@/components/AuthCheck';
 import { CurrentProgramSongList } from '@/components/CurrentProgramSongList';
 import { parseDate } from '@/lib/Utils';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export function CurrentProgram({ programs, fullProgramId }: { programs: any, fullProgramId: string }) {
+    const router = useRouter();
+
     const deleteProgram = async () => {
         
         // Delete individual programs
@@ -35,7 +37,7 @@ export function CurrentProgram({ programs, fullProgramId }: { programs: any, ful
           
         await res.json();
 
-        redirect('/programs/current');
+        router.push('/programs/history');;
     }
     
     return (

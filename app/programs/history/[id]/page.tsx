@@ -19,17 +19,19 @@ export default async function Program({ params }: Props) {
 
   let selectedPrograms: any[] = [];
   
-  for (let p of selectedFullProgram!.programs) {
-    let sp = await prisma.program.findUnique({
-        where: {
-            id: p.id
-        },
-        include: {
-            songs: true
-        },
-    });
-    
-    selectedPrograms = [...selectedPrograms, sp];
+  if (selectedFullProgram) {  
+    for (let p of selectedFullProgram!.programs) {
+      let sp = await prisma.program.findUnique({
+          where: {
+              id: p.id
+          },
+          include: {
+              songs: true
+          },
+      });
+      
+      selectedPrograms = [...selectedPrograms, sp];
+    }
   }
   
   return (
