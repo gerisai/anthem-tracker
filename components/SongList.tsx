@@ -2,19 +2,9 @@
 
 import { Heading, List, ListItem, Badge, Tag, TagLabel, Menu, MenuList, MenuItem, Tooltip } from "@chakra-ui/react";
 import { MenuButtonSong } from '@/components/MenuButton';
+import { parseDate, repeatColors, sortFns } from '@/lib/Utils';
 
-const repeatColors: any = {
-    0: 'teal',
-    1: 'yellow'
-}
 
-const options: any = { year: 'numeric', month: 'numeric' ,day: 'numeric' };
-
-const sortFns: any = {
-    himno: (a: any, b: any) => Number(a.number) - Number(b.number), // numerical
-    salmo: (a: any, b: any) => Number(a.name.match(/\d+/)[0]) - Number(b.name.match(/\d+/)[0]), // numerical from the name
-    canto: (a: any, b: any) => a.name > b.name ? 1 : -1 // alphabetical
-}
 
 export function SongList({ type, songs, choosable, addProgramSong }: {type: string, songs: Array<any>, choosable: boolean, addProgramSong: any }) {
     const filteredSongs = songs.filter((song) => song.type === type.toLowerCase());
@@ -51,7 +41,7 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
                             song.dates.map((d: any) => {
                                 return (
                                     <>
-                                        {d.toLocaleDateString('es-MX',options)}
+                                        {parseDate(d)}
                                         <br/>
                                     </>
                                 )

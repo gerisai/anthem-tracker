@@ -1,3 +1,14 @@
+export const repeatColors: any = {
+    0: 'teal',
+    1: 'yellow'
+}
+
+export const sortFns: any = {
+    himno: (a: any, b: any) => Number(a.number) - Number(b.number), // numerical
+    salmo: (a: any, b: any) => Number(a.name.match(/\d+/)[0]) - Number(b.name.match(/\d+/)[0]), // numerical from the name
+    canto: (a: any, b: any) => a.name > b.name ? 1 : -1 // alphabetical
+}
+
 export const parseDate = (d: any) => {
     const D = d.toISOString().split('T')[0].split('-').reverse().join('-');
     return D

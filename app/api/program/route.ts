@@ -129,21 +129,25 @@ export async function PUT(req: Request) {
     }
   });
 
+  console.log(data)
+
   // Remove date from old songs
-  data.oldSongs.forEach(async (song: any) => {
+  for (let song of data.oldSongs) {
+    console.log(`Deleting date: ${data.date} from song: ${song.id}`)
     await prisma.song.update({
       where: {
         id: song.id
       },
       data: {
-        dates: song.dates.filter((d: any) => d.toISOString() !== data.date.toISOString())
+        dates: song.dates.filter((d: any) => new Date(d).toISOString() !== data.date.toISOString())
       }
     });
-  });
-
+  }
 
   // Updates songs with new dates
-  data.songs.forEach(async (song: any) => {
+  for (let song of data.songs) {
+    console.log(`Adding date: ${data.date} from song: ${song.id}`)
+    console.log([...song.dates!, data.date])
     await prisma.song.update({
       where: {
         id: song.id
@@ -152,7 +156,7 @@ export async function PUT(req: Request) {
         dates: [...song.dates!, data.date]
       }
     });
-  });
+  }
 
   return NextResponse.json(program);
 }
