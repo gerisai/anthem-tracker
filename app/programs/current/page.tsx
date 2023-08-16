@@ -12,6 +12,6 @@ export default async function Programs() {
   });
 
   return (
-    <CurrentProgram programs={currentPrograms} historic={false}/>
+    <CurrentProgram programs={currentPrograms} fullProgramId=''/>
   )
 }

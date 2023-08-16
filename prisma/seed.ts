@@ -5,6 +5,8 @@ const prisma = new PrismaClient()
 const load = async () => {
     try {
         await prisma.song.deleteMany();
+        await prisma.program.deleteMany();
+        await prisma.fullProgram.deleteMany();
         console.log('Deleted records');
         await prisma.song.createMany({
             data: anthems

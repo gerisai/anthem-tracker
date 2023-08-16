@@ -33,6 +33,6 @@ export default async function Program({ params }: Props) {
   }
   
   return (
-    <CurrentProgram programs={selectedPrograms} historic={true}/>
+    <CurrentProgram programs={selectedPrograms} fullProgramId={selectedFullProgram!.id}/>
   )
 }

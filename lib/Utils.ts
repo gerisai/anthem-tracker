@@ -1,3 +1,13 @@
+export const parseDate = (d: any) => {
+    const D = d.toISOString().split('T')[0].split('-').reverse().join('-');
+    return D
+}
+  
+export const parseDateISO = (d: any) => {
+    const D = d.toISOString().split('T')[0];
+    return D
+}
+
 export const emoji: any = {
     0: '0️⃣',
     1: '1️⃣',
