@@ -1,20 +1,54 @@
 'use client'
 
 import { Heading, Divider, Flex, Button, Link } from '@chakra-ui/react';
-import { BiPlus, BiPencil } from "react-icons/bi";
+import { BiPlus, BiPencil, BiTrash } from "react-icons/bi";
 import AuthCheck from '@/components/AuthCheck';
 import { CurrentProgramSongList } from '@/components/CurrentProgramSongList';
 import { parseDate } from '@/lib/Utils';
+import { redirect } from 'next/navigation';
 
 export function CurrentProgram({ programs, fullProgramId }: { programs: any, fullProgramId: string }) {
+    const deleteProgram = async () => {
+        
+        // Delete individual programs
+        for (let program of programs) {
+        
+            const res = await fetch('/api/program', {
+            method: 'DELETE',
+            body: JSON.stringify({ id: program.id, date: program.date, songs: program.songs }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            });
+          
+            await res.json();
+        }
+
+        //Delete full program
+        const res = await fetch('/api/fullprogram', {
+            method: 'DELETE',
+            body: JSON.stringify({ id: fullProgramId }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            });
+          
+        await res.json();
+
+        redirect('/programs/current');
+    }
+    
     return (
         <Flex color='white' alignItems="center" justify="center" w="80%"
         mx={8} px={8} direction="column">
             <AuthCheck>
                 { fullProgramId ?
+                <>
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
                     <Link href={`/programs/history/${fullProgramId}/edit`}><Button colorScheme='yellow' mr={2} leftIcon={<BiPencil/>}>Editar programa</Button></Link>
+                    <Button colorScheme='red' mr={2} leftIcon={<BiTrash/>} onClick={deleteProgram}>Borrar programa</Button>
                 </Flex>
+                </>
                 :
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
                   <Link href='/programs/current/new'><Button colorScheme='green' mr={2} leftIcon={<BiPlus/>}>Crear programa</Button></Link>

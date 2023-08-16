@@ -51,3 +51,15 @@ export async function POST(req: Request) {
 
   return NextResponse.json(fullProgram);
 }
+
+export async function DELETE(req: Request) {
+  const data = await req.json();
+
+  const fullProgram = await prisma.fullProgram.delete({
+    where: {
+      id: data.id
+    }
+  });
+
+  return NextResponse.json(fullProgram);
+}

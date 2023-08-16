@@ -1,4 +1,4 @@
-import { Highlight, Flex, Tag } from "@chakra-ui/react";
+import { Highlight, Flex } from "@chakra-ui/react";
 import { numberToEmoji } from '@/lib/Utils';
 
 export function CurrentProgramSongList({ programSongs }:{ programSongs: Array<any> }) {   
