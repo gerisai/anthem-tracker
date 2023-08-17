@@ -6,8 +6,10 @@ import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
 import { parseDateISO } from '@/lib/Utils';
+import { useRouter } from 'next/navigation';
 
 export function EditProgramPage({ songs, existingPrograms }: { songs: any, existingPrograms: any }) {
+  const router = useRouter();
   const existingDate = parseDateISO(existingPrograms[0].date)
 
   const initialPrograms: any = {
@@ -79,6 +81,8 @@ export function EditProgramPage({ songs, existingPrograms }: { songs: any, exist
     }
 
     setIsLoading(false);
+
+    router.push('/programs/history');
   }
 
   return (

@@ -129,10 +129,13 @@ export async function PUT(req: Request) {
     }
   });
 
-  console.log(data)
-
   // Remove date from old songs
-  for (let song of data.oldSongs) {
+  const newSongsIds = data.songs.map((s: any) => s.id);
+  const oldSongsIds = data.oldSongs.map((s: any) => s.id);
+  const filteredOldSongs = data.oldSongs.filter((os: any) => !newSongsIds.includes(os.id));
+  const filteredNewSongs = data.songs.filter((ns: any) => !oldSongsIds.includes(ns.id))
+  
+  for (let song of filteredOldSongs) {
     await prisma.song.update({
       where: {
         id: song.id
@@ -144,7 +147,7 @@ export async function PUT(req: Request) {
   }
 
   // Updates songs with new dates
-  for (let song of data.songs) {
+  for (let song of filteredNewSongs) {
     await prisma.song.update({
       where: {
         id: song.id
