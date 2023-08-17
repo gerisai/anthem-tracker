@@ -70,6 +70,7 @@ model Program {
   author      User          @relation(fields: [userId], references: [id])
   isCurrent   Boolean
   userId      String
+  order       Json
   fullprogram FullProgram[]
 }
 

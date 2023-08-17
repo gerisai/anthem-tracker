@@ -3,7 +3,7 @@
 import { Card, CardBody, Text, Button, HStack, Link } from "@chakra-ui/react";
 import { parseDate } from "@/lib/Utils";
 
-export function SongRecord({ program }: { program:any }) {
+export function ProgramRecord({ program }: { program:any }) {
     const formatedDate = parseDate(program.date)
     
     return (

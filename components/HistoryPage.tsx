@@ -1,22 +1,8 @@
 'use client'
 
-import { Flex, Heading, Divider } from "@chakra-ui/react"
-import { SongRecord } from '@/components/SongRecord'
-
-const monthsToNames: any = {
-    0: 'Enero',
-    1: 'Febrero',
-    2: 'Marzo',
-    3: 'Abril',
-    4: 'Mayo',
-    5: 'Junio',
-    6: 'Julio',
-    7: 'Agosto',
-    8: 'Septiembre',
-    9: 'Octubre',
-    10: 'Noviembre',
-    11: 'Diciembre'
-}
+import { Flex, Heading, Divider } from '@chakra-ui/react';
+import { ProgramRecord } from '@/components/ProgramRecord';
+import { monthsToNames } from '@/lib/Utils';
 
 export function HistoryPage({ programs }: { programs: any }) {
     programs.sort((a: any, b: any) => {
@@ -42,7 +28,7 @@ export function HistoryPage({ programs }: { programs: any }) {
         <Flex wrap='wrap' color='white' alignItems="left" justify="left" direction="row" mx={2} w="100%">
             {
             monthPrograms.map((mp: any, i: number) => (
-                <SongRecord key={i} program={mp}/>
+                <ProgramRecord key={i} program={mp}/>
             ))
             }
         </Flex>

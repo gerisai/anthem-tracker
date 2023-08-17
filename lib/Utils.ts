@@ -9,6 +9,21 @@ export const sortFns: any = {
     canto: (a: any, b: any) => a.name > b.name ? 1 : -1 // alphabetical
 }
 
+export const monthsToNames: any = {
+    0: 'Enero',
+    1: 'Febrero',
+    2: 'Marzo',
+    3: 'Abril',
+    4: 'Mayo',
+    5: 'Junio',
+    6: 'Julio',
+    7: 'Agosto',
+    8: 'Septiembre',
+    9: 'Octubre',
+    10: 'Noviembre',
+    11: 'Diciembre'
+}
+
 export const parseDate = (d: any) => {
     const D = d.toISOString().split('T')[0].split('-').reverse().join('-');
     return D
