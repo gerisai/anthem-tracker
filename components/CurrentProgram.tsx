@@ -6,12 +6,15 @@ import AuthCheck from '@/components/AuthCheck';
 import { CurrentProgramSongList } from '@/components/CurrentProgramSongList';
 import { parseDate } from '@/lib/Utils';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function CurrentProgram({ programs, fullProgramId }: { programs: any, fullProgramId: string }) {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
 
     const deleteProgram = async () => {
-        
+        setIsLoading(true);
+
         // Delete individual programs
         for (let program of programs) {
         
@@ -37,7 +40,8 @@ export function CurrentProgram({ programs, fullProgramId }: { programs: any, ful
           
         await res.json();
 
-        router.push('/programs/history');;
+        setIsLoading(false);
+        router.push('/programs/history');
     }
     
     return (
@@ -48,7 +52,7 @@ export function CurrentProgram({ programs, fullProgramId }: { programs: any, ful
                 <>
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
                     <Link href={`/programs/history/${fullProgramId}/edit`}><Button colorScheme='yellow' mr={2} leftIcon={<BiPencil/>}>Editar programa</Button></Link>
-                    <Button colorScheme='red' mr={2} leftIcon={<BiTrash/>} onClick={deleteProgram}>Borrar programa</Button>
+                    <Button isLoading={isLoading} colorScheme='red' mr={2} leftIcon={<BiTrash/>} onClick={deleteProgram}>Borrar programa</Button>
                 </Flex>
                 </>
                 :
