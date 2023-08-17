@@ -63,7 +63,7 @@ export function CurrentProgram({ programs, fullProgramId }: { programs: any, ful
             </AuthCheck>
             {
                 programs.length === 0 ? 
-                <Heading>No hay programas</Heading>
+                <Heading>No hay programas publicados</Heading>
                 :
                 <>
                 <Heading>{ parseDate(programs[0].date) }</Heading>

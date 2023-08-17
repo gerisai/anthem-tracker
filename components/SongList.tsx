@@ -27,6 +27,8 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
                     return acc
                 },0);
 
+                const validDates = song.dates.filter((d: any) => d.getTime() - referenceDate > 0)
+
                 const color = repeatColors[repeats] || 'red';
                 
                 return (           
@@ -39,7 +41,7 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
                             </Tag>
                         </MenuButtonSong>
                         <Tooltip placement='right' label={
-                            song.dates.map((d: any) => {
+                            validDates.map((d: any) => {
                                 return (
                                     <>
                                         {parseDate(d)}
