@@ -13,7 +13,8 @@ export default async function Program({ params }: Props) {
       id: params.id
     },
     include: {
-      programs: true
+      programs: true,
+      author: true
     }
   });
 
@@ -35,6 +36,6 @@ export default async function Program({ params }: Props) {
   }
   
   return (
-    <CurrentProgram programs={selectedPrograms} fullProgramId={selectedFullProgram!.id}/>
+    <CurrentProgram programs={selectedPrograms} fullProgramId={selectedFullProgram!.id} author={selectedFullProgram!.author}/>
   )
 }

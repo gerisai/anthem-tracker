@@ -7,11 +7,12 @@ export default async function Programs() {
       isCurrent: true
     },
     include: {
-      songs: true
+      songs: true,
+      author: true
     }
   });
 
   return (
-    <CurrentProgram programs={currentPrograms} fullProgramId=''/>
+    <CurrentProgram programs={currentPrograms} fullProgramId='' author={currentPrograms[0]!.author}/>
   )
 }

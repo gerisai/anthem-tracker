@@ -8,7 +8,7 @@ import { parseDate } from '@/lib/Utils';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function CurrentProgram({ programs, fullProgramId }: { programs: any, fullProgramId: string }) {
+export function CurrentProgram({ programs, fullProgramId, author }: { programs: any, fullProgramId: string, author: any }) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -67,6 +67,7 @@ export function CurrentProgram({ programs, fullProgramId }: { programs: any, ful
                 :
                 <>
                 <Heading>{ parseDate(programs[0].date) }</Heading>
+                <Heading size='sm'>Por: {  author.name }</Heading>
                 <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
                 <Heading>Recibimiento</Heading>
                 <Divider size='lg'variant='dashed' mt={2} mb={6}/>
