@@ -1725,12 +1725,22 @@ const anthems =
         dates: []
     },
     {
+        name: 'Salmo 37',
+        type: 'salmo',
+        dates: []
+    },
+    {
         name: 'Salmo 40',
         type: 'salmo',
         dates: []
     },
     {
         name: 'Salmo 40 (Alterna)',
+        type: 'salmo',
+        dates: []
+    },
+    {
+        name: 'Salmo 42',
         type: 'salmo',
         dates: []
     },
@@ -1781,6 +1791,11 @@ const anthems =
     },
     {
         name: 'Salmo 92',
+        type: 'salmo',
+        dates: []
+    },
+    {
+        name: 'Salmo 95',
         type: 'salmo',
         dates: []
     },
@@ -1902,6 +1917,91 @@ const anthems =
     },
     {
         name: 'Corintios 13',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Proverbios 26',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Aunque Gigantes',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'La Cosecha',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'De Gloria en Gloria',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Soy yo Señor',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'A tu lado Señor',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Sofonías 3',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Hoy viviré',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Caminaré',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Todo me habla de Dios',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Estremece mis huesos',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Eres',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Al Contemplar tu grandeza',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Allá a lo lejos',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Cristo cambió mi vida',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Noble sostén',
+        type: 'canto',
+        dates: []
+    },
+    {
+        name: 'Unidos',
         type: 'canto',
         dates: []
     },
