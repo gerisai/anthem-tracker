@@ -68,7 +68,7 @@ const anthems =
     },
     {
         number: '12',
-        name: 'A solas al huerto',
+        name: '¡Oh, sí es un Reino aquí!',
         type: 'himno',
         dates: []
     },
@@ -1550,7 +1550,7 @@ const anthems =
     },
     {
         number: '259',
-        name: 'Mi Dios: la Roc Fuerte',
+        name: 'Mi Dios: la Roca Fuerte',
         type: 'himno',
         dates: []
     },
