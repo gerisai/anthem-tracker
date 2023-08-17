@@ -1,6 +1,6 @@
 'use client'
 
-import { Heading, List, ListItem, Badge, Tag, TagLabel, Menu, MenuList, MenuItem, Tooltip } from "@chakra-ui/react";
+import { Flex, Heading, List, ListItem, Badge, Tag, TagLabel, Menu, MenuList, MenuItem, Tooltip } from "@chakra-ui/react";
 import { MenuButtonSong } from '@/components/MenuButton';
 import { parseDate, repeatColors, sortFns } from '@/lib/Utils';
 
@@ -16,6 +16,7 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
     return (
     <>
     <Heading color='white' my={6}>{type}s</Heading>
+        <Flex style={ {overflowY: 'scroll', height: '400px' }}>
         <List color='white' spacing={3}>
         {
             filteredSongs.map((song: any, i: number) => {
@@ -64,6 +65,7 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
             })
         }
         </List>
+        </Flex>
     </>
     )
 }
