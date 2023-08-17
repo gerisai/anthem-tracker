@@ -41,6 +41,7 @@ export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose:
     await res.json();
     onClose();
     setIsLoading(false);
+    location.reload();
   }
   
   return (
@@ -66,7 +67,7 @@ export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose:
                 <FormLabel>Tipo</FormLabel>
                 <Select name='type'>
                     <option value='salmo'>Salmo</option>
-                    <option value='santo'>Canto</option>
+                    <option value='canto'>Canto</option>
                 </Select>
             </FormControl>
           </DrawerBody>
