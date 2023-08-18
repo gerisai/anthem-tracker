@@ -4,12 +4,12 @@ import { Flex, Tabs, TabList, Tab, TabPanels, TabPanel, Button, useDisclosure } 
 import { SongList } from '@/components/SongList';
 import { NewSong } from '@/components/NewSong';
 import { BiPlus } from 'react-icons/bi';
-import { useRef } from 'react';
+import { LegacyRef, useRef } from 'react';
 import AuthCheck from '@/components/AuthCheck';
 
 export function SongsPage({ songs }: { songs: any }) {
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const btnRef = useRef()
+    const btnRef = useRef(null);
     return (
         <Flex alignItems="center" justify="center" direction="column" m={2} p={2} w="80%">
         <AuthCheck>
