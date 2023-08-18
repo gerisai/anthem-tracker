@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Registro de cantos',
 }
 
+export const dynamic = 'auto';
+
 export default function RootLayout({
   children,
 }: {
