@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Registro de cantos',
 }
 
-export const dynamic = 'auto';
+export const dynamic = 'force-dynamic';
 
 export default function RootLayout({
   children,
