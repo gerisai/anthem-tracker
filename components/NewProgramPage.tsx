@@ -1,6 +1,10 @@
 'use client'
 
-import { Tabs, TabPanels, TabPanel, TabList, Tab, FormControl, FormLabel, Switch, Input, Heading, Divider, Flex, Button } from '@chakra-ui/react'
+import { 
+  Tabs, TabPanels, TabPanel, TabList, Tab, 
+  FormControl, FormLabel, Switch, Input, 
+  Heading, Divider, Flex, Button 
+} from '@chakra-ui/react'
 import { BiSolidFileBlank, BiRevision } from "react-icons/bi";
 import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
@@ -56,10 +60,17 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
     // Create individual programs
     for (let programType in programs) {
+      let i = 0;
+      const order = programs[programType].songs.reduce((a:any,v:any) =>{
+        i++
+        return {...a, [v.name]: i}
+      },{});
+
 
       const body = {
         ...programs[programType],
         date: formData.get('date'),
+        order: order,
         isCurrent: formData.get('isCurrent') ? true : false
       };
 
@@ -101,7 +112,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
   return (
     <Flex color='white' justify="start" align="start" w="100%"
-    mx={8} px={8} py={8} direction="row"> 
+    mx={8} px={8} py={8} direction="row">
     <Flex color='white' justify="center" align="center" w="50%"
     mx={8} px={8} py={8} direction="column" rounded={6}>
       <Tabs variant='soft-rounded' colorScheme='teal' size='lg'>
@@ -128,17 +139,17 @@ export function NewProgramPage({ songs }: { songs: any }) {
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Recibimiento</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList programSongs={programs.recibimiento.songs} program='recibimiento' deleteProgramSong={deleteProgramSong}/>
+          <ProgramSongList program={programs.recibimiento} programType='recibimiento' deleteProgramSong={deleteProgramSong}/>
         </Flex>
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Matutino</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList programSongs={programs.matutino.songs} program='matutino' deleteProgramSong={deleteProgramSong}/>
+          <ProgramSongList program={programs.matutino} programType='matutino' deleteProgramSong={deleteProgramSong}/>
         </Flex>
         <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
         <Heading>Vespertino</Heading>
         <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList programSongs={programs.vespertino.songs} program='vespertino' deleteProgramSong={deleteProgramSong}/>
+          <ProgramSongList program={programs.vespertino} programType='vespertino' deleteProgramSong={deleteProgramSong}/>
         </Flex>
         <form onSubmit={createProgram}>
         <Flex direction='column' alignItems="center" justify="center" mb={4}>

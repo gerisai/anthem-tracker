@@ -71,17 +71,17 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
                 <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
                 <Heading>Recibimiento</Heading>
                 <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-                    <CurrentProgramSongList programSongs={programs.filter((program: any) => program.type === 'recibimiento')[0].songs}/>
+                    <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'recibimiento')[0]}/>
                 </Flex>
                 <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
                 <Heading>Matutino</Heading>
                 <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-                    <CurrentProgramSongList programSongs={programs.filter((program: any) => program.type === 'matutino')[0].songs}/>
+                    <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'matutino')[0]}/>
                 </Flex>
                 <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
                 <Heading>Vespertino</Heading>
                 <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-                    <CurrentProgramSongList programSongs={programs.filter((program: any) => program.type === 'vespertino')[0].songs}/>
+                    <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'vespertino')[0]}/>
                 </Flex>
                 </>
             }

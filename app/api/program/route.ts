@@ -48,7 +48,8 @@ export async function POST(req: Request) {
       isCurrent: data.isCurrent,
       songs: {
         connect: data.songs.map((song: any) => ({ id: song.id }))
-      }
+      },
+      order: data.order
     }
   });
 
@@ -125,7 +126,8 @@ export async function PUT(req: Request) {
       isCurrent: data.isCurrent,
       songs: {
         connect: data.songs.map((song: any) => ({ id: song.id }))
-      }
+      },
+      order: data.order
     }
   });
 

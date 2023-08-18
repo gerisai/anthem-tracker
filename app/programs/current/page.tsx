@@ -13,6 +13,6 @@ export default async function Programs() {
   });
 
   return (
-    <CurrentProgram programs={currentPrograms} fullProgramId='' author={currentPrograms[0]!.author}/>
+    <CurrentProgram programs={currentPrograms} fullProgramId='' author={currentPrograms[0]?.author}/>
   )
 }
