@@ -1,6 +1,8 @@
 import { CurrentProgram } from '@/components/CurrentProgram';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
     params: {
       id: string;
