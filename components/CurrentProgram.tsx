@@ -41,7 +41,7 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
         await res.json();
 
         setIsLoading(false);
-        router.push('/programs/history');
+        router.push('/programs/history?refresh=true');
     }
     
     return (

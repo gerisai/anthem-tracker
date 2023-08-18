@@ -94,7 +94,7 @@ export function EditProgramPage({ songs, existingPrograms }: { songs: any, exist
 
     setIsLoading(false);
 
-    router.push('/programs/history');
+    router.push('/programs/history?refresh=true');
   }
 
   return (

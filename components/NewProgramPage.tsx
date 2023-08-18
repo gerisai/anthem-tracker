@@ -107,7 +107,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
     setIsLoading(false);
 
-    router.push('/programs/history');
+    router.push('/programs/history?refresh=true');
   }
 
   return (

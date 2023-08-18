@@ -3,8 +3,18 @@
 import { Flex, Heading, Divider } from '@chakra-ui/react';
 import { ProgramRecord } from '@/components/ProgramRecord';
 import { monthsToNames } from '@/lib/Utils';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export function HistoryPage({ programs }: { programs: any }) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const shouldRefresh = searchParams.get('refresh');
+
+    if (shouldRefresh) {
+        router.refresh();
+    }
+    
     programs.sort((a: any, b: any) => {
         let da: any = new Date(a.date),
             db: any = new Date(b.date);
