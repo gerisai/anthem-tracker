@@ -92,7 +92,7 @@ const anthems =
     },
     {
         number: '16',
-        name: '¡Salvo ya Soy',
+        name: '¡Salvo ya Soy!',
         type: 'himno',
         dates: []
     },
@@ -218,7 +218,7 @@ const anthems =
     },
     {
         number: '37',
-        name: '!Oh, Abre Tú mi Corazón',
+        name: '!Oh, Abre Tú mi Corazón!',
         type: 'himno',
         dates: []
     },
@@ -1046,7 +1046,7 @@ const anthems =
     },
     {
         number: '175',
-        name: 'Bástame su Gracias',
+        name: 'Bástame su Gracia',
         type: 'himno',
         dates: []
     },
