@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getCurrentUser, unauthorized } from '@/lib/auth';
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  const foundUser = await prisma.user.findFirst({
-    where: {
-      name: session?.user?.name!
-    }
-  });
-  
+  const foundUser = await getCurrentUser();
+  if (!foundUser) {
+    return unauthorized();
+  }
+
   const data = await req.json();
 
   data.date = new Date(data.date);
@@ -39,7 +36,7 @@ export async function POST(req: Request) {
       date: data.date,
       author: {
         connect: {
-          id: foundUser!.id
+          id: foundUser.id
         }
       },
       isCurrent: data.isCurrent,
@@ -53,6 +50,10 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  if (!(await getCurrentUser())) {
+    return unauthorized();
+  }
+
   const data = await req.json();
 
   const fullProgram = await prisma.fullProgram.delete({

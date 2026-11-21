@@ -58,8 +58,8 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
 ## Conventions and gotchas
 
 - Path alias `@/*` → repo root.
-- Auth: protected pages call `getServerSession(authOptions)` and redirect; client-side `AuthCheck` hides edit/delete controls for anonymous users. **API routes do not check auth**: `/api/song` and the DELETE handlers accept anonymous requests. Keep this in mind before adding features.
-- API routes look up the user by `session.user.name` (not email/id).
+- Auth: protected pages call `getServerSession(authOptions)` and redirect; client-side `AuthCheck` hides edit/delete controls for anonymous users. Every API handler must start with `getCurrentUser()` from `lib/auth.ts` and return `unauthorized()` (401) when it's null. Any logged-in user can modify any program (no per-author ownership checks).
+- `getCurrentUser()` looks up the user by `session.user.name` (not email/id).
 - No DB transactions: multi-step writes are sequential `await`s, and `POST /api/program` updates song dates in a non-awaited `forEach`.
 - Dates come from `<input type="date">` (UTC midnight); `parseDate` formats as `DD-MM-YYYY`.
 - Dependencies are from mid-2023 (Next 13.4, NextAuth 4, Prisma 5). Treat any upgrade as its own task.
