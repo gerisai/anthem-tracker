@@ -16,7 +16,7 @@ export function HistoryPage({ programs }: { programs: any }) {
     }
     
     programs.sort((a: any, b: any) => {
-        let da: any = new Date(a.date),
+        const da: any = new Date(a.date),
             db: any = new Date(b.date);
         return da - db;
     });
