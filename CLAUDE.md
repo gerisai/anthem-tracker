@@ -4,19 +4,19 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 
 ## Stack
 
-- **Next.js 13.4 App Router**, React 18, TypeScript (`strict`, but `any` is used widely)
-- **Chakra UI 2** (+ Emotion, framer-motion) for all UI; theme in `app/theme.tsx`
-- **Prisma 5** with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
-- **NextAuth 4** with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
+- **Next.js 16 App Router** (Turbopack is the default bundler for dev and build), React 19, TypeScript (`strict`, but `any` is used widely). Dynamic route `params` is a Promise: `const { id } = await params`.
+- **Chakra UI 2** (+ Emotion, framer-motion) for all UI; theme in `app/theme.tsx`. Chakra v3 is a rewrite, so staying on v2 is deliberate. `app/providers.tsx` has its own Emotion cache provider (`compat = true` + `useServerInsertedHTML`); `@chakra-ui/next-js`'s `CacheProvider` caused React 19 hydration errors because Chakra's global styles didn't get its cache.
+- **Prisma 5** (6+ changes the setup; upgrade separately) with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
+- **NextAuth 4** (4.24+, supports Next 16) with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
 - Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting). Vercel runs the `vercel-build` script instead of `build`: `prisma generate`, then `prisma migrate deploy` only when `VERCEL_ENV=production` (previews share the DB, so they must not migrate it), then `next build`. Merging a PR with a migration applies it to production.
-- No test framework. No linter config beyond `next lint`.
+- No test framework. ESLint 9 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off). `next build` doesn't run lint.
 
 ## Commands
 
 ```bash
 npm run dev          # local dev server
 npm run build        # production build (also the main type check)
-npm run lint
+npm run lint         # eslint . (next lint was removed in Next 16)
 npx prisma generate  # regenerate client after schema changes
 npx prisma migrate dev --name <change>   # create + apply a migration locally after editing schema.prisma
 npx prisma migrate deploy                 # apply pending migrations (Vercel runs this on production deploys)
@@ -63,4 +63,4 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
 - `getCurrentUser()` looks up the user by `session.user.id`, which the NextAuth `session` callback adds (typed in `types/next-auth.d.ts`). Sessions use the database strategy (Prisma adapter), so the callback receives the DB `user`.
 - Each API handler runs all its writes in one `prisma.$transaction`; keep multi-step writes inside it.
 - Dates come from `<input type="date">` (UTC midnight); `parseDate` formats as `DD-MM-YYYY`.
-- Dependencies are from mid-2023 (Next 13.4, NextAuth 4, Prisma 5). Treat any upgrade as its own task.
+- `package-lock.json` must stay in sync with `package.json` (`npm ci` fails otherwise). Use npm on Node 26.

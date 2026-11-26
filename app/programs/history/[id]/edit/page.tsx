@@ -7,12 +7,13 @@ import { redirect } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-    params: {
+    params: Promise<{
       id: string;
-    };
+    }>;
 };
 
 export default async function EditProgram({ params }: Props) {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session) {
@@ -23,7 +24,7 @@ export default async function EditProgram({ params }: Props) {
   
     const selectedFullProgram = await prisma.fullProgram.findUnique({
     where: {
-      id: params.id
+      id: id
     },
     include: {
       programs: true
@@ -32,8 +33,8 @@ export default async function EditProgram({ params }: Props) {
 
   let selectedPrograms: any[] = [];
   
-  for (let p of selectedFullProgram!.programs) {
-    let sp = await prisma.program.findUnique({
+  for (const p of selectedFullProgram!.programs) {
+    const sp = await prisma.program.findUnique({
         where: {
             id: p.id
         },
@@ -46,6 +47,6 @@ export default async function EditProgram({ params }: Props) {
   }
   
   return (
-    <EditProgramPage songs={songs} existingPrograms={selectedPrograms} fullProgramId={params.id}/>
+    <EditProgramPage songs={songs} existingPrograms={selectedPrograms} fullProgramId={id}/>
   )
 }

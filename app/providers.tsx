@@ -1,22 +1,45 @@
 'use client'
 
-import { CacheProvider } from '@chakra-ui/next-js'
+import createCache from '@emotion/cache'
+import { CacheProvider } from '@emotion/react'
 import { ChakraProvider } from '@chakra-ui/react'
 import { SessionProvider } from 'next-auth/react';
+import { useServerInsertedHTML } from 'next/navigation'
+import { useState } from 'react'
 import theme from './theme'
 
-export function Providers({ 
-    children 
-  }: { 
-  children: React.ReactNode 
+// Emotion cache for the App Router: styles rendered on the server are collected
+// and flushed into the HTML stream instead of being inlined next to elements,
+// which React 19 reports as a hydration mismatch
+function EmotionCacheProvider({ children }: { children: React.ReactNode }) {
+  const [cache] = useState(() => {
+    const cache = createCache({ key: 'css', prepend: true });
+    cache.compat = true;
+    return cache;
+  });
+
+  useServerInsertedHTML(() => (
+    <style
+      data-emotion={`${cache.key} ${Object.keys(cache.inserted).join(' ')}`}
+      dangerouslySetInnerHTML={{ __html: Object.values(cache.inserted).join(' ') }}
+    />
+  ));
+
+  return <CacheProvider value={cache}>{children}</CacheProvider>;
+}
+
+export function Providers({
+    children
+  }: {
+  children: React.ReactNode
   }) {
   return (
     <SessionProvider>
-      <CacheProvider>
+      <EmotionCacheProvider>
         <ChakraProvider theme={theme}>
           {children}
         </ChakraProvider>
-      </CacheProvider>
+      </EmotionCacheProvider>
     </SessionProvider>
   )
 }

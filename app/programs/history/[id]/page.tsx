@@ -4,15 +4,16 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-    params: {
+    params: Promise<{
       id: string;
-    };
+    }>;
 };
 
 export default async function Program({ params }: Props) {
+  const { id } = await params;
   const selectedFullProgram = await prisma.fullProgram.findUnique({
     where: {
-      id: params.id
+      id: id
     },
     include: {
       programs: true,
@@ -23,8 +24,8 @@ export default async function Program({ params }: Props) {
   let selectedPrograms: any[] = [];
   
   if (selectedFullProgram) {  
-    for (let p of selectedFullProgram!.programs) {
-      let sp = await prisma.program.findUnique({
+    for (const p of selectedFullProgram!.programs) {
+      const sp = await prisma.program.findUnique({
           where: {
               id: p.id
           },

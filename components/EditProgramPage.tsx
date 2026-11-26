@@ -43,18 +43,18 @@ export function EditProgramPage({ songs, existingPrograms, fullProgramId }: { so
 
   const addProgramSong = (program: string, song: any) => {
     programs[program].songs = [...programs[program].songs, song];
-    let newPrograms = Object.assign({},programs);
+    const newPrograms = Object.assign({},programs);
     setPrograms(newPrograms);
   }
 
   const deleteProgramSong = (program: string, song: any) => {
     programs[program].songs = programs[program].songs.filter((s: any) => s.id !== song.id)
-    let newPrograms = Object.assign({},programs);
+    const newPrograms = Object.assign({},programs);
     setPrograms(newPrograms);
   }
 
   const restorePrograms = () => {
-    let newPrograms = Object.assign({},initialPrograms);
+    const newPrograms = Object.assign({},initialPrograms);
     setPrograms(newPrograms);
   }
 
