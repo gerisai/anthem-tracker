@@ -8,7 +8,7 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 - **Chakra UI 2** (+ Emotion, framer-motion) for all UI; theme in `app/theme.tsx`
 - **Prisma 5** with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
 - **NextAuth 4** with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
-- Hosted on **Vercel**
+- Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting)
 - No test framework. No linter config beyond `next lint`.
 
 ## Commands
