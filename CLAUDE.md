@@ -9,23 +9,36 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 - **Prisma 5** (6+ changes the setup; upgrade separately) with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
 - **NextAuth 4** (4.24+, supports Next 16) with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
 - Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting). Vercel runs the `vercel-build` script instead of `build`: `prisma generate`, then `prisma migrate deploy` only when `VERCEL_ENV=production` (previews share the DB, so they must not migrate it), then `next build`. Merging a PR with a migration applies it to production.
-- No test framework. ESLint 9 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off). `next build` doesn't run lint.
+- **Vitest** integration tests for the API routes in `tests/api`, run against a real local Postgres. ESLint 9 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off). `next build` doesn't run lint.
 
 ## Commands
 
 ```bash
+npm run db:up        # local Postgres in Docker (localhost:5433): anthem, anthem_test, anthem_shadow
+npm run db:setup     # prisma migrate deploy + seed, against .env's DATABASE_URL
 npm run dev          # local dev server
+npm run dev:login    # create a local user + session, prints the cookie to paste in the browser
+npm test             # Vitest integration tests (needs db:up); npm run test:watch
 npm run build        # production build (also the main type check)
 npm run lint         # eslint . (next lint was removed in Next 16)
 npx prisma generate  # regenerate client after schema changes
 npx prisma migrate dev --name <change>   # create + apply a migration locally after editing schema.prisma
 npx prisma migrate deploy                 # apply pending migrations (Vercel runs this on production deploys)
-npx prisma db seed   # runs prisma/seed.ts — WIPES the Song table and reloads prisma/data.js
+npx prisma db seed   # runs prisma/seed.ts with tsx — WIPES the Song table and reloads prisma/data.js
 ```
+
+Local setup steps for humans are in `README.md`.
 
 ## Environment variables
 
-Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, plus the usual NextAuth vars (`NEXTAUTH_URL`, `NEXTAUTH_SECRET`). Production values live in Vercel project settings.
+`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings.
+
+## Testing
+
+- Tests call route handlers directly (`POST(jsonRequest(...))`) with Prisma pointed at `TEST_DATABASE_URL`. `tests/env.ts` points `DATABASE_URL` at the test DB before anything imports Prisma, `tests/setup.ts` mocks `getCurrentUser` and empties every table before each test, and `tests/global-setup.ts` runs `prisma migrate deploy` on the test DB once. Test files run one at a time (shared DB).
+- Helpers in `tests/helpers.ts`: `logInAs()`, `logOut()`, `createSongs()`, `servicePayload()` (same shape as `toProgramInputs`), `songDates()`.
+- `tests/test-database.ts` and `scripts/dev-login.ts` refuse to run against a non-local database. Keep that guard on anything that writes test data.
+- When changing API behavior, add or update a test in `tests/api` and run `npm test`.
 
 ## Layout
 
