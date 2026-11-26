@@ -12,12 +12,14 @@ import {
     Input,
     FormControl,
     FormLabel,
-    Select
+    Select,
+    useToast
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
 export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose: any, btnRef: any }) {
   const [isLoading, setIsLoading ] = useState(false);
+  const toast = useToast();
 
   const createSong = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,9 +40,14 @@ export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose:
       },
     });
 
-    await res.json();
-    onClose();
     setIsLoading(false);
+
+    if (!res.ok) {
+      toast({ title: 'No se pudo guardar el canto', status: 'error' });
+      return;
+    }
+
+    onClose();
     location.reload();
   }
   
