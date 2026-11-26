@@ -18,15 +18,16 @@ npm run dev                 # http://localhost:3000
 
 ### Logging in locally
 
-There are two ways to log in.
+There are three ways to log in.
 
 **Dev login script.** No setup needed:
 
 ```bash
-npm run dev:login            # or: npm run dev:login -- "Some Name"
+npm run dev:login                      # "Dev User", editor
+npm run dev:login -- "Some Name" admin # any name; role: viewer, editor (default) or admin
 ```
 
-It creates a user and session in the local database and prints a `document.cookie = ...` line. Paste it into the browser console on `http://localhost:3000` and reload. The script refuses to run unless `DATABASE_URL` points to localhost.
+It creates or updates a user and session in the local database and prints a `document.cookie = ...` line. Paste it into the browser console on `http://localhost:3000` and reload. If you're already logged in, click **Cerrar Sesión** first: the existing session cookie is httpOnly, so the pasted line can't replace it. The script refuses to run unless `DATABASE_URL` points to localhost.
 
 **GitHub OAuth app.** This goes through the real login flow:
 
@@ -34,7 +35,44 @@ It creates a user and session in the local database and prints a `document.cooki
 2. Set **Homepage URL** to `http://localhost:3000` and **Authorization callback URL** to `http://localhost:3000/api/auth/callback/github`.
 3. Copy the client ID and generate a client secret into `GITHUB_ID` and `GITHUB_SECRET` in `.env`, then restart `npm run dev`.
 
-Use a separate OAuth app from production, because production's callback URL points to the deployed site. Google works the same way: create an OAuth client with the redirect URI `http://localhost:3000/api/auth/callback/google`.
+**Google OAuth client.** This also goes through the real login flow:
+
+1. In the [Google Cloud Console](https://console.cloud.google.com), select or create a project (a separate one for local work, such as `anthem-tracker-dev`, keeps it apart from production).
+2. Go to **Google Auth Platform** (*APIs & Services → OAuth consent screen* in older layouts) → **Get started**. Enter an app name and your email as the support and contact email, and choose **External** as the audience.
+3. In **Audience**, leave the publishing status as **Testing** and add your Gmail under **Test users**. While the app is in Testing, only test users can log in. NextAuth only requests `openid`, `email` and `profile`, so Google doesn't need to review the app.
+4. Go to **Clients → Create client** and choose **Web application**:
+   - Authorized JavaScript origins: `http://localhost:3000`
+   - Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
+5. Copy the client ID and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env` (the secret may only be shown once), then restart `npm run dev`.
+
+Common problems:
+- **`redirect_uri_mismatch`:** the redirect URI must match exactly (`http`, port `3000`, no trailing slash). Changes can take a few minutes to apply.
+- **`OAuthAccountNotLinked`:** NextAuth won't link GitHub and Google logins that share an email. Locally, use one provider per email, or reset with `docker compose down -v && npm run db:up && npm run db:setup`. `dev:login` users use `@localhost` emails, so they never conflict.
+
+Keep the local GitHub app and Google client separate from production's. Production's callback URLs point to the deployed site, and its credentials stay in Vercel.
+
+New users who log in through GitHub or Google start as **viewers**. Give yourself a role with `npm run user:role` (see below).
+
+## Roles
+
+| Role | Can |
+|---|---|
+| `viewer` (default for every new login) | View services and songs |
+| `editor` | Also create services and songs, and edit or delete **their own** services |
+| `admin` | Also edit or delete **any** service |
+
+The rules live in `lib/permissions.ts`. The API enforces them with 403 responses, and the UI hides controls the user can't use.
+
+```bash
+npm run user:role                              # list users and roles
+npm run user:role -- you@example.com admin     # set a role (by email or user id)
+```
+
+`user:role` uses `DATABASE_URL` from your environment if it's set, and otherwise reads `.env`. It prints which database host it's using. To manage production users, run it with the production URL from Vercel:
+
+```bash
+DATABASE_URL="<production url>" npm run user:role -- you@example.com admin
+```
 
 ## Tests
 

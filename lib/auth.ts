@@ -19,3 +19,7 @@ export async function getCurrentUser() {
 }
 
 export const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+export const forbidden = () => NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+export const notFound = () => NextResponse.json({ error: 'Not found' }, { status: 404 });

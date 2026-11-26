@@ -12,7 +12,7 @@ export function SongsPage({ songs }: { songs: any }) {
     const btnRef = useRef(null);
     return (
         <Flex alignItems="center" justify="center" direction="column" m={2} p={2} w="80%">
-        <AuthCheck>
+        <AuthCheck editor>
             <Button ref={btnRef} onClick={onOpen} colorScheme='green' mb={8} leftIcon={<BiPlus/>}>Añadir canto</Button>
         </AuthCheck>
         <NewSong isOpen={isOpen} onClose={onClose} btnRef={btnRef}/>

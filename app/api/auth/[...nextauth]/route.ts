@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import NextAuth from 'next-auth';
 import type { NextAuthOptions } from 'next-auth';
+import type { AdapterUser } from 'next-auth/adapters';
+import type { Role } from '@prisma/client';
 import GithubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
@@ -21,9 +23,11 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        // Expose the database user id so API routes can look the user up by id
+        // Expose the database user id and role: API routes look the user up by id,
+        // and the UI uses the role to decide which controls to show
         session({ session, user }) {
             session.user.id = user.id;
+            session.user.role = (user as AdapterUser & { role: Role }).role;
             return session;
         }
     }

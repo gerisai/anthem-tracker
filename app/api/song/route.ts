@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, unauthorized } from '@/lib/auth';
+import { getCurrentUser, unauthorized, forbidden } from '@/lib/auth';
+import { canCreate } from '@/lib/permissions';
 
 const SONG_TYPES = ['himno', 'salmo', 'canto'];
 
 const badRequest = (error: string) => NextResponse.json({ error }, { status: 400 });
 
 export async function POST(req: Request) {
-  if (!(await getCurrentUser())) {
+  const user = await getCurrentUser();
+  if (!user) {
     return unauthorized();
+  }
+  if (!canCreate(user)) {
+    return forbidden();
   }
 
   const data = await req.json();

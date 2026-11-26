@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import type { Song } from '@prisma/client';
+import type { Role, Song } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -15,9 +15,9 @@ export async function resetDatabase() {
   );
 }
 
-export async function logInAs(name = 'Test User') {
+export async function logInAs(name = 'Test User', role: Role = 'editor') {
   const user = await prisma.user.create({
-    data: { name, email: `${name.toLowerCase().replace(/\s+/g, '.')}@test.local` },
+    data: { name, role, email: `${name.toLowerCase().replace(/\s+/g, '.')}@test.local` },
   });
 
   vi.mocked(getCurrentUser).mockResolvedValue(user);

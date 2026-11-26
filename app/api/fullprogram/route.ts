@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, unauthorized } from '@/lib/auth';
+import type { User } from '@prisma/client';
+import { getCurrentUser, unauthorized, forbidden, notFound } from '@/lib/auth';
+import { canCreate, canModify } from '@/lib/permissions';
 import { PROGRAM_TYPES, ProgramInput, addSongDates, removeSongDates, clearCurrent } from '@/lib/programs';
 
 const songIdsOf = (program: { songs: { id: string }[] }) => program.songs.map((s) => s.id);
@@ -13,11 +15,39 @@ const hasAllTypes = (programs: ProgramInput[]) =>
 
 const badRequest = (error: string) => NextResponse.json({ error }, { status: 400 });
 
+// Returns an error response unless the user may edit or delete the service
+async function checkCanModify(user: User, id: unknown) {
+  if (typeof id !== 'string') {
+    return badRequest('Missing service id');
+  }
+
+  const existing = await prisma.fullProgram.findUnique({
+    where: {
+      id
+    },
+    select: {
+      userId: true
+    }
+  });
+
+  if (!existing) {
+    return notFound();
+  }
+  if (!canModify(user, existing.userId)) {
+    return forbidden();
+  }
+
+  return null;
+}
+
 // Creates a full program and its three programs in one transaction
 export async function POST(req: Request) {
   const foundUser = await getCurrentUser();
   if (!foundUser) {
     return unauthorized();
+  }
+  if (!canCreate(foundUser)) {
+    return forbidden();
   }
 
   const data = await req.json();
@@ -86,6 +116,12 @@ export async function PUT(req: Request) {
   }
 
   const data = await req.json();
+
+  const denied = await checkCanModify(foundUser, data.id);
+  if (denied) {
+    return denied;
+  }
+
   const programs: ProgramInput[] = data.programs;
 
   if (!hasAllTypes(programs)) {
@@ -127,11 +163,6 @@ export async function PUT(req: Request) {
         },
         data: {
           date,
-          author: {
-            connect: {
-              id: foundUser.id
-            }
-          },
           isCurrent,
           songs: {
             set: songIdsOf(p).map((id) => ({ id }))
@@ -162,11 +193,17 @@ export async function PUT(req: Request) {
 
 // Deletes a full program and its programs in one transaction
 export async function DELETE(req: Request) {
-  if (!(await getCurrentUser())) {
+  const foundUser = await getCurrentUser();
+  if (!foundUser) {
     return unauthorized();
   }
 
   const data = await req.json();
+
+  const denied = await checkCanModify(foundUser, data.id);
+  if (denied) {
+    return denied;
+  }
 
   const fullProgram = await prisma.$transaction(async (tx) => {
     const fullProgram = await tx.fullProgram.findUniqueOrThrow({

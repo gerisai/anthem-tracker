@@ -1,8 +1,8 @@
 // Creates a test user and a NextAuth session in the LOCAL database and prints
 // the cookie to log in as that user, without going through GitHub or Google.
-// Usage: npm run dev:login [-- "Name"]
+// Usage: npm run dev:login [-- "Name" [viewer|editor|admin]]   (role defaults to editor)
 import { randomBytes } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 
 const url = new URL(process.env.DATABASE_URL ?? '');
 
@@ -16,12 +16,18 @@ const prisma = new PrismaClient();
 
 const main = async () => {
   const name = process.argv[2] ?? 'Dev User';
+  const role = (process.argv[3] ?? 'editor') as Role;
   const email = `${name.toLowerCase().replace(/\s+/g, '.')}@localhost`;
+
+  if (!Object.values(Role).includes(role)) {
+    console.error(`Role must be one of: ${Object.values(Role).join(', ')}`);
+    process.exit(1);
+  }
 
   const user = await prisma.user.upsert({
     where: { email },
-    update: { name },
-    create: { name, email }
+    update: { name, role },
+    create: { name, email, role }
   });
 
   const sessionToken = randomBytes(32).toString('hex');
@@ -31,7 +37,9 @@ const main = async () => {
     data: { sessionToken, userId: user.id, expires }
   });
 
-  console.log(`Logged in as ${user.name} <${user.email}> until ${expires.toISOString()}\n`);
+  console.log(`Logged in as ${user.name} <${user.email}> (${user.role}) until ${expires.toISOString()}\n`);
+  console.log('If you are already logged in, click "Cerrar Sesión" first: the existing session');
+  console.log('cookie is httpOnly, so the line below cannot replace it.\n');
   console.log('Paste this in the browser console on http://localhost:3000, then reload:\n');
   console.log(`document.cookie = "next-auth.session-token=${sessionToken}; path=/; max-age=${30 * 24 * 60 * 60}"\n`);
   console.log('Or with curl:\n');

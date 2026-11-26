@@ -47,10 +47,20 @@ model User {
   image         String?
   age           Int?
   bio           String?
+  role          Role          @default(viewer)
   accounts      Account[]
   sessions      Session[]
   programs      Program[]
   fullprograms  FullProgram[]
+}
+
+// viewer: read-only (default for anyone who signs in)
+// editor: creates services and songs, edits/deletes their own services
+// admin: everything editors can, on any service
+enum Role {
+  viewer
+  editor
+  admin
 }
 
 model Song {

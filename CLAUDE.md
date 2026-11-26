@@ -17,7 +17,8 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 npm run db:up        # local Postgres in Docker (localhost:5433): anthem, anthem_test, anthem_shadow
 npm run db:setup     # prisma migrate deploy + seed, against .env's DATABASE_URL
 npm run dev          # local dev server
-npm run dev:login    # create a local user + session, prints the cookie to paste in the browser
+npm run dev:login    # create a local user + session (-- "Name" [viewer|editor|admin], default editor); prints the cookie
+npm run user:role    # list users, or -- <email|id> <role> to set one (uses DATABASE_URL env first, then .env)
 npm test             # Vitest integration tests (needs db:up); npm run test:watch
 npm run build        # production build (also the main type check)
 npm run lint         # eslint . (next lint was removed in Next 16)
@@ -36,7 +37,7 @@ Local setup steps for humans are in `README.md`.
 ## Testing
 
 - Tests call route handlers directly (`POST(jsonRequest(...))`) with Prisma pointed at `TEST_DATABASE_URL`. `tests/env.ts` points `DATABASE_URL` at the test DB before anything imports Prisma, `tests/setup.ts` mocks `getCurrentUser` and empties every table before each test, and `tests/global-setup.ts` runs `prisma migrate deploy` on the test DB once. Test files run one at a time (shared DB).
-- Helpers in `tests/helpers.ts`: `logInAs()`, `logOut()`, `createSongs()`, `servicePayload()` (same shape as `toProgramInputs`), `songDates()`.
+- Helpers in `tests/helpers.ts`: `logInAs(name, role = 'editor')`, `logOut()`, `createSongs()`, `servicePayload()` (same shape as `toProgramInputs`), `songDates()`.
 - `tests/test-database.ts` and `scripts/dev-login.ts` refuse to run against a non-local database. Keep that guard on anything that writes test data.
 - When changing API behavior, add or update a test in `tests/api` and run `npm test`.
 
@@ -60,7 +61,7 @@ Local setup steps for humans are in `README.md`.
 - **Song**: `type` is one of `himno` | `salmo` | `canto`. `number` is set for himnos. `dates: DateTime[]` is a denormalized list of every date the song was used — it's maintained manually by the program API routes, not derived from relations.
 - **Program**: one service section on a date. `type` is one of `recibimiento` | `matutino` | `vespertino`. Many-to-many with Song. `order` is JSON `{ [songName]: position }`. `isCurrent` marks the current program per type.
 - **FullProgram**: groups the three Programs for one date; also has `isCurrent`.
-- **User/Account/Session**: standard NextAuth schema.
+- **User/Account/Session**: standard NextAuth schema, plus `User.role` (`Role` enum: `viewer` default, `editor`, `admin`). Every new GitHub/Google login starts as `viewer`.
 
 ### How data flows
 
@@ -72,8 +73,9 @@ Local setup steps for humans are in `README.md`.
 ## Conventions and gotchas
 
 - Path alias `@/*` → repo root.
-- Auth: protected pages call `getServerSession(authOptions)` and redirect; client-side `AuthCheck` hides edit/delete controls for anonymous users. Every API handler must start with `getCurrentUser()` from `lib/auth.ts` and return `unauthorized()` (401) when it's null. Any logged-in user can modify any program (no per-author ownership checks).
-- `getCurrentUser()` looks up the user by `session.user.id`, which the NextAuth `session` callback adds (typed in `types/next-auth.d.ts`). Sessions use the database strategy (Prisma adapter), so the callback receives the DB `user`.
+- Auth: every API handler starts with `getCurrentUser()` from `lib/auth.ts` and returns `unauthorized()` (401) when it's null.
+- Permissions live in `lib/permissions.ts` (client-safe, shared by API and UI): `canCreate(user)` (editor/admin create services and songs) and `canModify(user, ownerId)` (admins any service; editors only where `FullProgram.userId` is theirs). APIs return `forbidden()` (403) and `notFound()` (404); `/api/fullprogram` PUT/DELETE check via `checkCanModify` before the transaction. Protected pages redirect (`/programs/current/new` needs `canCreate`, `[id]/edit` needs `canModify`). `<AuthCheck editor>` and `<AuthCheck ownerId={...}>` hide controls the user can't use. Editing keeps the original author on the FullProgram and its Programs.
+- `getCurrentUser()` looks up the user by `session.user.id`; the NextAuth `session` callback adds `id` and `role` (typed in `types/next-auth.d.ts`). Sessions use the database strategy (Prisma adapter), so the callback receives the DB `user`.
 - Each API handler runs all its writes in one `prisma.$transaction`; keep multi-step writes inside it.
 - Dates come from `<input type="date">` (UTC midnight); `parseDate` formats as `DD-MM-YYYY`.
 - `package-lock.json` must stay in sync with `package.json` (`npm ci` fails otherwise). Use npm on Node 26.

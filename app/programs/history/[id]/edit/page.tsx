@@ -2,7 +2,8 @@ import { EditProgramPage } from '@/components/EditProgramPage';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../api/auth/[...nextauth]/route';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { canModify } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,9 +32,16 @@ export default async function EditProgram({ params }: Props) {
     }
   });
 
+  if (!selectedFullProgram) {
+    notFound();
+  }
+  if (!canModify(session.user, selectedFullProgram.userId)) {
+    redirect(`/programs/history/${id}`);
+  }
+
   let selectedPrograms: any[] = [];
   
-  for (const p of selectedFullProgram!.programs) {
+  for (const p of selectedFullProgram.programs) {
     const sp = await prisma.program.findUnique({
         where: {
             id: p.id
