@@ -12,38 +12,32 @@ export async function POST(req: Request) {
 
   data.date = new Date(data.date);
 
-  if (data.isCurrent) { // Update last current full program to become old
-    const oldFullProgram = await prisma.fullProgram.findFirst({
-      where: {
-        isCurrent: true
+  const fullProgram = await prisma.$transaction(async (tx) => {
+    if (data.isCurrent) { // Update last current full program to become old
+      await tx.fullProgram.updateMany({
+        where: {
+          isCurrent: true
+        },
+        data: {
+          isCurrent: false
+        }
+      });
+    }
+
+    return tx.fullProgram.create({
+      data: {
+        date: data.date,
+        author: {
+          connect: {
+            id: foundUser.id
+          }
+        },
+        isCurrent: data.isCurrent,
+        programs: {
+          connect: data.programs.map((program: any) => ({ id: program }))
+        }
       }
     });
-
-    if (oldFullProgram) {
-        await prisma.fullProgram.update({
-          where: {
-            id: oldFullProgram!.id
-          },
-          data: {
-            isCurrent: false
-          }
-        })
-    }
-  }
-
-  const fullProgram = await prisma.fullProgram.create({
-    data: {
-      date: data.date,
-      author: {
-        connect: {
-          id: foundUser.id
-        }
-      },
-      isCurrent: data.isCurrent,
-      programs: {
-        connect: data.programs.map((program: any) => ({ id: program }))
-      }
-    }
   });
 
   return NextResponse.json(fullProgram);

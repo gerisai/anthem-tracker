@@ -1,6 +1,47 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, unauthorized } from '@/lib/auth';
+
+// Adds the program date to each song's usage history
+async function addSongDates(tx: Prisma.TransactionClient, songIds: string[], date: Date) {
+  for (const id of songIds) {
+    await tx.song.update({
+      where: {
+        id
+      },
+      data: {
+        dates: { push: date }
+      }
+    });
+  }
+}
+
+// Removes one occurrence of the program date from each song's usage history.
+// Only one, because a song can be in several programs on the same date.
+async function removeSongDates(tx: Prisma.TransactionClient, songIds: string[], date: Date) {
+  for (const id of songIds) {
+    const song = await tx.song.findUniqueOrThrow({
+      where: {
+        id
+      }
+    });
+
+    const i = song.dates.findIndex((d) => d.getTime() === date.getTime());
+    if (i === -1) {
+      continue;
+    }
+
+    await tx.song.update({
+      where: {
+        id
+      },
+      data: {
+        dates: song.dates.filter((_, j) => j !== i)
+      }
+    });
+  }
+}
 
 export async function POST(req: Request) {
   const foundUser = await getCurrentUser();
@@ -11,54 +52,41 @@ export async function POST(req: Request) {
   const data = await req.json();
 
   data.date = new Date(data.date);
+  const songIds: string[] = data.songs.map((song: any) => song.id);
 
-  if (data.isCurrent) { // Update last current program to become old
-    const oldProgram = await prisma.program.findFirst({
-      where: {
-        isCurrent: true,
-        type: data.type
-      }
-    });
-
-
-    if (oldProgram) {
-      await prisma.program.update({
+  const program = await prisma.$transaction(async (tx) => {
+    if (data.isCurrent) { // Update last current program to become old
+      await tx.program.updateMany({
         where: {
-          id: oldProgram!.id
+          isCurrent: true,
+          type: data.type
         },
         data: {
           isCurrent: false
         }
-      })
+      });
     }
-  }
 
-  const program = await prisma.program.create({
-    data: {
-      type: data.type,
-      date: data.date,
-      author: {
-        connect: {
-          id: foundUser.id
-        }
-      },
-      isCurrent: data.isCurrent,
-      songs: {
-        connect: data.songs.map((song: any) => ({ id: song.id }))
-      },
-      order: data.order
-    }
-  });
-
-  data.songs.forEach(async (song: any) => {
-    await prisma.song.update({
-      where: {
-        id: song.id
-      },
+    const program = await tx.program.create({
       data: {
-        dates: [...song.dates!, data.date]
+        type: data.type,
+        date: data.date,
+        author: {
+          connect: {
+            id: foundUser.id
+          }
+        },
+        isCurrent: data.isCurrent,
+        songs: {
+          connect: songIds.map((id) => ({ id }))
+        },
+        order: data.order
       }
     });
+
+    await addSongDates(tx, songIds, data.date);
+
+    return program;
   });
 
   return NextResponse.json(program);
@@ -73,87 +101,59 @@ export async function PUT(req: Request) {
   const data = await req.json();
 
   data.date = new Date(data.date);
+  const songIds: string[] = data.songs.map((song: any) => song.id);
 
-  if (data.isCurrent) { // Update last current program to become old
-    const oldProgram = await prisma.program.findFirst({
+  const program = await prisma.$transaction(async (tx) => {
+    // Read the program as stored, so song dates are fixed up from the DB
+    // rather than from the client's copy
+    const oldProgram = await tx.program.findUniqueOrThrow({
       where: {
-        isCurrent: true,
-        type: data.type
+        id: data.id
+      },
+      include: {
+        songs: true
       }
     });
 
-
-    if (oldProgram) {
-      await prisma.program.update({
+    if (data.isCurrent) { // Update last current program to become old
+      await tx.program.updateMany({
         where: {
-          id: oldProgram!.id
+          isCurrent: true,
+          type: data.type
         },
         data: {
           isCurrent: false
         }
-      })
+      });
     }
-  }
 
-  await prisma.program.update({ // Delete all previous songs
-    where: {
-      id: data.id
-    },
-    data: {
-      songs: {
-        set: [],
-      }
-    }
-  });
-
-  const program = await prisma.program.update({ // Update with new songs
-    where: {
-      id: data.id
-    },
-    data: {
-      type: data.type,
-      date: data.date,
-      author: {
-        connect: {
-          id: foundUser.id
-        }
-      },
-      isCurrent: data.isCurrent,
-      songs: {
-        connect: data.songs.map((song: any) => ({ id: song.id }))
-      },
-      order: data.order
-    }
-  });
-
-  // Remove date from old songs
-  const newSongsIds = data.songs.map((s: any) => s.id);
-  const oldSongsIds = data.oldSongs.map((s: any) => s.id);
-  const filteredOldSongs = data.oldSongs.filter((os: any) => !newSongsIds.includes(os.id));
-  const filteredNewSongs = data.songs.filter((ns: any) => !oldSongsIds.includes(ns.id))
-  
-  for (let song of filteredOldSongs) {
-    await prisma.song.update({
+    const program = await tx.program.update({
       where: {
-        id: song.id
+        id: data.id
       },
       data: {
-        dates: song.dates.filter((d: any) => new Date(d).toISOString() !== data.date.toISOString())
+        type: data.type,
+        date: data.date,
+        author: {
+          connect: {
+            id: foundUser.id
+          }
+        },
+        isCurrent: data.isCurrent,
+        songs: {
+          set: songIds.map((id) => ({ id }))
+        },
+        order: data.order
       }
     });
-  }
 
-  // Updates songs with new dates
-  for (let song of filteredNewSongs) {
-    await prisma.song.update({
-      where: {
-        id: song.id
-      },
-      data: {
-        dates: [...song.dates!, data.date]
-      }
-    });
-  }
+    // Remove the old date from the old songs, then add the new date to the new songs.
+    // This also covers the program date being changed.
+    await removeSongDates(tx, oldProgram.songs.map((s) => s.id), oldProgram.date);
+    await addSongDates(tx, songIds, data.date);
+
+    return program;
+  });
 
   return NextResponse.json(program);
 }
@@ -165,25 +165,20 @@ export async function DELETE(req: Request) {
 
   const data = await req.json();
 
-  data.date = new Date(data.date);
-
-  const program = await prisma.program.delete({
-    where: {
-      id: data.id
-    }
-  });
-
-  // Remove date from old songs
-  for (let song of data.songs) {
-    await prisma.song.update({
+  const program = await prisma.$transaction(async (tx) => {
+    const program = await tx.program.delete({
       where: {
-        id: song.id
+        id: data.id
       },
-      data: {
-        dates: song.dates.filter((d: any) => new Date(d).toISOString() !== data.date.toISOString())
+      include: {
+        songs: true
       }
     });
-  }
+
+    await removeSongDates(tx, program.songs.map((s) => s.id), program.date);
+
+    return program;
+  });
 
   return NextResponse.json(program);
 }
