@@ -8,7 +8,7 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 - **Chakra UI 2** (+ Emotion, framer-motion) for all UI; theme in `app/theme.tsx`
 - **Prisma 5** with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
 - **NextAuth 4** with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
-- Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting)
+- Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting). Vercel runs the `vercel-build` script instead of `build`: `prisma generate`, then `prisma migrate deploy` only when `VERCEL_ENV=production` (previews share the DB, so they must not migrate it), then `next build`. Merging a PR with a migration applies it to production.
 - No test framework. No linter config beyond `next lint`.
 
 ## Commands
@@ -18,7 +18,8 @@ npm run dev          # local dev server
 npm run build        # production build (also the main type check)
 npm run lint
 npx prisma generate  # regenerate client after schema changes
-npx prisma migrate dev   # migrations dir is gitignored (*/migrations)
+npx prisma migrate dev --name <change>   # create + apply a migration locally after editing schema.prisma
+npx prisma migrate deploy                 # apply pending migrations (Vercel runs this on production deploys)
 npx prisma db seed   # runs prisma/seed.ts — WIPES the Song table and reloads prisma/data.js
 ```
 
@@ -38,7 +39,7 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
   - `api/auth/[...nextauth]/route.ts` — exports `authOptions` (imported by other routes/pages)
 - `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props
 - `lib/Utils.ts` — sort functions per song type, date formatting, month names, repeat colors, emoji numbers
-- `prisma/` — `schema.prisma`, `seed.ts`, `data.js` (the hymnal catalog: ~280 himnos, ~40 salmos, ~30 cantos)
+- `prisma/` — `schema.prisma`, `migrations/` (baseline `0_init` = schema as of Nov 2026), `seed.ts`, `data.js` (the hymnal catalog: ~280 himnos, ~40 salmos, ~30 cantos)
 
 ## Domain model
 
