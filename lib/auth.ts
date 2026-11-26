@@ -7,13 +7,13 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.name) {
+  if (!session?.user?.id) {
     return null;
   }
 
-  return prisma.user.findFirst({
+  return prisma.user.findUnique({
     where: {
-      name: session.user.name
+      id: session.user.id
     }
   });
 }
