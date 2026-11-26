@@ -1,6 +1,7 @@
-const { anthems } = require('./data');
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
+import { PrismaClient } from '@prisma/client';
+import { anthems } from './data';
+
+const prisma = new PrismaClient();
 
 const load = async () => {
     try {

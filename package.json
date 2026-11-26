@@ -10,10 +10,16 @@
     "build": "next build",
     "vercel-build": "prisma generate && if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; fi && next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:setup": "prisma migrate deploy && prisma db seed",
+    "dev:login": "tsx --env-file=.env scripts/dev-login.ts"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.10.10",
@@ -36,6 +42,8 @@
   "devDependencies": {
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.6",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "tsx": "^4.23.15",
+    "vitest": "^5.1.2"
   }
 }
