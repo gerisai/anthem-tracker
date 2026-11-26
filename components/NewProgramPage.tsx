@@ -3,13 +3,14 @@
 import { 
   Tabs, TabPanels, TabPanel, TabList, Tab, 
   FormControl, FormLabel, Switch, Input, 
-  Heading, Divider, Flex, Button 
+  Heading, Divider, Flex, Button, useToast
 } from '@chakra-ui/react'
 import { BiSolidFileBlank, BiRevision } from "react-icons/bi";
 import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toProgramInputs } from '@/lib/Utils';
 
 const initialPrograms: any = {
   recibimiento: {
@@ -30,10 +31,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
   const router = useRouter();
   const [programs, setPrograms]: [any,any] = useState(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
-  const fullProgram = {
-    programs: new Array(0),
-    date: ''
-  }
+  const toast = useToast();
 
   const addProgramSong = (program: string, song: any) => {
     programs[program].songs = [...programs[program].songs, song];
@@ -58,41 +56,11 @@ export function NewProgramPage({ songs }: { songs: any }) {
 
     const formData = new FormData(e.currentTarget);
 
-    // Create individual programs
-    for (let programType in programs) {
-      let i = 0;
-      const order = programs[programType].songs.reduce((a:any,v:any) =>{
-        i++
-        return {...a, [v.name]: i}
-      },{});
-
-
-      const body = {
-        ...programs[programType],
-        date: formData.get('date'),
-        order: order,
-        isCurrent: formData.get('isCurrent') ? true : false
-      };
-
-      const res = await fetch('/api/program', {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      const createdProgram = await res.json();
-
-      fullProgram.programs = [...fullProgram.programs, createdProgram.id]
-
-    }
-
-    // Create full program
+    // Create the full program and its programs in one request
     const body = {
       date: formData.get('date'),
       isCurrent: formData.get('isCurrent') ? true : false,
-      programs: fullProgram.programs
+      programs: toProgramInputs(programs)
     };
 
     const res = await fetch('/api/fullprogram', {
@@ -103,9 +71,12 @@ export function NewProgramPage({ songs }: { songs: any }) {
       },
     });
 
-    await res.json();
-
     setIsLoading(false);
+
+    if (!res.ok) {
+      toast({ title: 'No se pudo guardar el programa', status: 'error' });
+      return;
+    }
 
     router.push('/programs/history?refresh=true');
   }

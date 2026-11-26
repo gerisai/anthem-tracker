@@ -50,3 +50,12 @@ export const emoji: any = {
 export function numberToEmoji(i: number) {
     return i.toString().split('').map((i) => emoji[i]).join('')
 }
+
+// Builds the /api/fullprogram payload for each program: song ids and their order by name
+export function toProgramInputs(programs: any) {
+    return Object.values(programs).map((p: any) => ({
+        type: p.type,
+        songs: p.songs.map((s: any) => ({ id: s.id })),
+        order: p.songs.reduce((a: any, s: any, i: number) => ({ ...a, [s.name]: i + 1 }), {})
+    }));
+}
