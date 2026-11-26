@@ -35,10 +35,11 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
   - `programs/current/` — the current service program; `current/new/` creates one (auth required)
   - `programs/history/` — list of all FullPrograms; `[id]/` view, `[id]/edit/` edit (auth required)
   - `programs/songs/` — song catalog with usage info; add new songs
-  - `api/program`, `api/fullprogram`, `api/song` — route handlers (POST/PUT/DELETE), called from client components via `fetch`
+  - `api/fullprogram` (POST/PUT/DELETE a whole service) and `api/song` (POST) — route handlers called from client components via `fetch`
   - `api/auth/[...nextauth]/route.ts` — exports `authOptions` (imported by other routes/pages)
 - `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props
-- `lib/Utils.ts` — sort functions per song type, date formatting, month names, repeat colors, emoji numbers
+- `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload)
+- `lib/programs.ts` — server-side program helpers used inside transactions: `addSongDates`, `removeSongDates`, `clearCurrent`, `PROGRAM_TYPES`
 - `prisma/` — `schema.prisma`, `migrations/` (baseline `0_init` = schema as of Nov 2026), `seed.ts`, `data.js` (the hymnal catalog: ~280 himnos, ~40 salmos, ~30 cantos)
 
 ## Domain model
@@ -50,9 +51,8 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
 
 ### How data flows
 
-- Creating a program (`NewProgramPage`): client POSTs three `/api/program` requests (one per type), then POSTs `/api/fullprogram` with the created ids. Setting `isCurrent` flips the previous current record(s) to `false`.
-- Each program write also appends/removes the program date in `Song.dates` (`addSongDates`/`removeSongDates` in `app/api/program/route.ts`). The API reads the stored program and song dates from the DB; it ignores the `oldSongs`/`dates` the client still sends. Removal drops one occurrence, since a song can be in several programs on the same date. If you change program logic, keep `Song.dates` consistent.
-- Deleting (`CurrentProgram`) deletes each Program, then the FullProgram.
+- A service is one FullProgram with exactly one Program per type. `NewProgramPage`, `EditProgramPage` and `CurrentProgram` (delete) each make a single `/api/fullprogram` request (`{ id?, date, isCurrent, programs: [{ type, songs: [{ id }], order }] }`), and the handler writes the FullProgram, its Programs and song dates in one `prisma.$transaction`. Publishing (`isCurrent`) clears the flag on every other FullProgram and Program. Pages show an error toast and stay put if the request fails.
+- Each program write also appends/removes the program date in `Song.dates` (`addSongDates`/`removeSongDates` in `lib/programs.ts`). The API reads the stored programs and song dates from the DB, not the client's copy. Removal drops one occurrence, since a song can be in several programs on the same date. If you change program logic, keep `Song.dates` consistent.
 - After mutations, the client does `router.push('/programs/history?refresh=true')` or `location.reload()`. Data pages use `export const dynamic = 'force-dynamic'` so they always read fresh data (that's what the recent commits fixed). Keep that on any page that reads from the DB.
 - Song usage coloring (`SongList`): counts uses in the last 30 days → teal (0), yellow (1), red (2+).
 
@@ -61,6 +61,6 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
 - Path alias `@/*` → repo root.
 - Auth: protected pages call `getServerSession(authOptions)` and redirect; client-side `AuthCheck` hides edit/delete controls for anonymous users. Every API handler must start with `getCurrentUser()` from `lib/auth.ts` and return `unauthorized()` (401) when it's null. Any logged-in user can modify any program (no per-author ownership checks).
 - `getCurrentUser()` looks up the user by `session.user.id`, which the NextAuth `session` callback adds (typed in `types/next-auth.d.ts`). Sessions use the database strategy (Prisma adapter), so the callback receives the DB `user`.
-- Each API handler runs its writes in one `prisma.$transaction`. Creating or deleting a whole FullProgram still takes several requests from the client (three programs, then the FullProgram), so a failure between requests can leave partial data.
+- Each API handler runs all its writes in one `prisma.$transaction`; keep multi-step writes inside it.
 - Dates come from `<input type="date">` (UTC midnight); `parseDate` formats as `DD-MM-YYYY`.
 - Dependencies are from mid-2023 (Next 13.4, NextAuth 4, Prisma 5). Treat any upgrade as its own task.

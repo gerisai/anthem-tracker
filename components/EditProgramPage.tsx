@@ -3,17 +3,18 @@
 import { 
   FormControl, FormLabel, Switch, Input, 
   Heading, Divider, Flex, Button,
-  Tabs, TabPanels, TabPanel, TabList, Tab
+  Tabs, TabPanels, TabPanel, TabList, Tab, useToast
 } from '@chakra-ui/react'
 import { BiSolidFileBlank, BiRevision } from "react-icons/bi";
 import { SongList } from '@/components/SongList';
 import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
-import { parseDateISO } from '@/lib/Utils';
+import { parseDateISO, toProgramInputs } from '@/lib/Utils';
 import { useRouter } from 'next/navigation';
 
-export function EditProgramPage({ songs, existingPrograms }: { songs: any, existingPrograms: any }) {
+export function EditProgramPage({ songs, existingPrograms, fullProgramId }: { songs: any, existingPrograms: any, fullProgramId: string }) {
   const router = useRouter();
+  const toast = useToast();
   const existingDate = parseDateISO(existingPrograms[0].date)
 
   const initialPrograms: any = {
@@ -63,36 +64,28 @@ export function EditProgramPage({ songs, existingPrograms }: { songs: any, exist
 
     const formData = new FormData(e.currentTarget);
 
-    // Create individual programs
-    for (let programType in programs) {
-      let i = 0;
-      const order = programs[programType].songs.reduce((a:any,v:any) =>{
-        i++
-        return {...a, [v.name]: i}
-      },{});
+    // Update the full program and its programs in one request
+    const body = {
+      id: fullProgramId,
+      date: formData.get('date'),
+      isCurrent: formData.get('isCurrent') ? true : false,
+      programs: toProgramInputs(programs)
+    };
 
-      const body = {
-        ...programs[programType],
-        oldSongs: initialPrograms[programType].songs,
-        id: initialPrograms[programType].id,
-        date: formData.get('date'),
-        order: order,
-        isCurrent: formData.get('isCurrent') ? true : false
-      };
-
-      const res = await fetch('/api/program', {
-        method: 'PUT',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      await res.json();
-
-    }
+    const res = await fetch('/api/fullprogram', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     setIsLoading(false);
+
+    if (!res.ok) {
+      toast({ title: 'No se pudo guardar el programa', status: 'error' });
+      return;
+    }
 
     router.push('/programs/history?refresh=true');
   }

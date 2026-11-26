@@ -46,6 +46,6 @@ export default async function EditProgram({ params }: Props) {
   }
   
   return (
-    <EditProgramPage songs={songs} existingPrograms={selectedPrograms}/>
+    <EditProgramPage songs={songs} existingPrograms={selectedPrograms} fullProgramId={params.id}/>
   )
 }

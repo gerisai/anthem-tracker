@@ -1,6 +1,6 @@
 'use client'
 
-import { Heading, Divider, Flex, Button, Link } from '@chakra-ui/react';
+import { Heading, Divider, Flex, Button, Link, useToast } from '@chakra-ui/react';
 import { BiPlus, BiPencil, BiTrash } from "react-icons/bi";
 import AuthCheck from '@/components/AuthCheck';
 import { CurrentProgramSongList } from '@/components/CurrentProgramSongList';
@@ -10,37 +10,28 @@ import { useState } from 'react';
 
 export function CurrentProgram({ programs, fullProgramId, author }: { programs: any, fullProgramId: string, author: any }) {
     const router = useRouter();
+    const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
     const deleteProgram = async () => {
         setIsLoading(true);
 
-        // Delete individual programs
-        for (let program of programs) {
-        
-            const res = await fetch('/api/program', {
-            method: 'DELETE',
-            body: JSON.stringify({ id: program.id, date: program.date, songs: program.songs }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            });
-          
-            await res.json();
-        }
-
-        //Delete full program
+        // Delete the full program and its programs in one request
         const res = await fetch('/api/fullprogram', {
             method: 'DELETE',
             body: JSON.stringify({ id: fullProgramId }),
             headers: {
                 'Content-Type': 'application/json',
             },
-            });
-          
-        await res.json();
+        });
 
         setIsLoading(false);
+
+        if (!res.ok) {
+            toast({ title: 'No se pudo borrar el programa', status: 'error' });
+            return;
+        }
+
         router.push('/programs/history?refresh=true');
     }
     
