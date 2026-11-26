@@ -35,7 +35,7 @@ Stored in `.env` (gitignored): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `GITHUB_ID
   - `programs/current/` — the current service program; `current/new/` creates one (auth required)
   - `programs/history/` — list of all FullPrograms; `[id]/` view, `[id]/edit/` edit (auth required)
   - `programs/songs/` — song catalog with usage info; add new songs
-  - `api/fullprogram` (POST/PUT/DELETE a whole service) and `api/song` (POST) — route handlers called from client components via `fetch`
+  - `api/fullprogram` (POST/PUT/DELETE a whole service) and `api/song` (POST; accepts only `name`, `type` ∈ himno/salmo/canto and optional `number`, 400 otherwise) — route handlers called from client components via `fetch`
   - `api/auth/[...nextauth]/route.ts` — exports `authOptions` (imported by other routes/pages)
 - `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props
 - `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload)
