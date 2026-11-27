@@ -84,4 +84,4 @@ These are Vitest integration tests for the API routes (`tests/api`). They run ag
 
 ## Database changes
 
-Edit `prisma/schema.prisma`, then run `npx prisma migrate dev --name <change>` and commit the new folder in `prisma/migrations`. Production applies pending migrations on deploy (`vercel-build`).
+Edit `prisma/schema.prisma`, then run `npx prisma migrate dev --name <change>` and commit the new folder in `prisma/migrations`. Production deploys apply pending migrations (`scripts/vercel-build.sh`, the build command in `vercel.json`). Preview deploys don't, because they use the production database, so a PR's preview fails wherever it uses the new schema until the PR is merged.
