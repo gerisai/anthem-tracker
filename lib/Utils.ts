@@ -59,3 +59,10 @@ export function toProgramInputs(programs: any) {
         order: p.songs.reduce((a: any, s: any, i: number) => ({ ...a, [s.name]: i + 1 }), {})
     }));
 }
+
+// Dates within the last 30 days of `now`; drives the usage colors in SongList
+export const RECENT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function recentDates(dates: Date[], now: number) {
+    return dates.filter((d) => d.getTime() > now - RECENT_WINDOW_MS);
+}

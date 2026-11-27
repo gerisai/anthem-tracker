@@ -52,7 +52,7 @@ Local setup steps for humans are in `README.md`.
   - `api/fullprogram` (POST/PUT/DELETE a whole service) and `api/song` (POST; accepts only `name`, `type` ∈ himno/salmo/canto and optional `number`, 400 otherwise) — route handlers called from client components via `fetch`
   - `api/auth/[...nextauth]/route.ts` — exports `authOptions` (imported by other routes/pages)
 - `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props
-- `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload)
+- `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload), `recentDates` (last-30-days usage for `SongList`)
 - `lib/useProgramSongs.ts` — state hook for the new/edit service pages; `addSong`/`removeSong` are pure (never mutate state, so reset works)
 - `lib/programs.ts` — server-side program helpers used inside transactions: `addSongDates`, `removeSongDates`, `clearCurrent`, `PROGRAM_TYPES`
 - `prisma/` — `schema.prisma`, `migrations/` (baseline `0_init` = schema as of Nov 2026), `seed.ts`, `data.js` (the hymnal catalog: ~280 himnos, ~40 salmos, ~30 cantos)
