@@ -71,7 +71,7 @@ export function EditProgramPage({ songs, existingPrograms, fullProgramId }: { so
       return;
     }
 
-    router.push('/programs/history?refresh=true');
+    router.push('/programs/history');
   }
 
   return (

@@ -62,7 +62,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
       return;
     }
 
-    router.push('/programs/history?refresh=true');
+    router.push('/programs/history');
   }
 
   return (
