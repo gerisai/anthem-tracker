@@ -3,12 +3,15 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import NextAuth from 'next-auth';
 import type { NextAuthOptions } from 'next-auth';
 import type { AdapterUser } from 'next-auth/adapters';
-import type { Role } from '@prisma/client';
+import type { Role } from '@/generated/prisma/client';
 import GithubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
+    // The adapter is typed against @prisma/client's PrismaClient export, which
+    // Prisma 7's generator no longer fills in. It only uses the user, account
+    // and session model delegates, which are unchanged.
+    adapter: PrismaAdapter(prisma as unknown as Parameters<typeof PrismaAdapter>[0]),
     pages: {
         signIn: '/login'
     },

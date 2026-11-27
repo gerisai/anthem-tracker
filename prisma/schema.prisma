@@ -1,19 +1,15 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Generated into generated/prisma (gitignored); import from '@/generated/prisma/client'
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
-// url: what the app uses (in production, Neon's pooled connection).
-// directUrl: what Prisma Migrate uses. Migrations need a direct, non-pooled
-// connection: the pooler runs in transaction mode, which breaks migrate's
-// session-level advisory lock.
+// Connection URLs live in prisma.config.ts (CLI) and lib/prisma.ts (app)
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  directUrl         = env("DIRECT_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgresql"
 }
 
 // NextAuth schema

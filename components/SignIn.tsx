@@ -8,11 +8,11 @@ import { signIn } from 'next-auth/react'
 export default function SignIn({ providers }: { providers: any}){
     const providerTheming: any = {
         github: {
-            scheme: 'blackAlpha',
+            variant: 'solid',
             icon: <BiLogoGithub/>,
         },
         google: {
-            scheme: 'gray',
+            variant: 'outline',
             icon: <FcGoogle/>,
         }
     }
@@ -25,10 +25,10 @@ export default function SignIn({ providers }: { providers: any}){
                 Object.values(providers).map((provider: any) => (
                     <Button 
                         key={provider.id} 
-                        leftIcon={providerTheming[provider.id].icon}
-                        colorScheme={providerTheming[provider.id].scheme}
-                        onClick={async () => await signIn(provider.id,{ redirect: true, callbackUrl: '/'})} 
-                        my={2}>{provider.name}
+                        colorPalette='gray'
+                        variant={providerTheming[provider.id].variant}
+                        onClick={async () => await signIn(provider.id,{ redirect: true, callbackUrl: '/'})}
+                        my={2}>{providerTheming[provider.id].icon} {provider.name}
                     </Button>
                 ))
             }

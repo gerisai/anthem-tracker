@@ -5,11 +5,11 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 ## Stack
 
 - **Next.js 16 App Router** (Turbopack is the default bundler for dev and build), React 19, TypeScript (`strict`, but `any` is used widely). Dynamic route `params` is a Promise: `const { id } = await params`.
-- **Chakra UI 2** (+ Emotion, framer-motion) for all UI; theme in `app/theme.tsx`. Chakra v3 is a rewrite, so staying on v2 is deliberate. `app/providers.tsx` has its own Emotion cache provider (`compat = true` + `useServerInsertedHTML`); `@chakra-ui/next-js`'s `CacheProvider` caused React 19 hydration errors because Chakra's global styles didn't get its cache.
-- **Prisma 5** (6+ changes the setup; upgrade separately) with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
+- **Chakra UI 3** (+ Emotion) for all UI. v3 uses compound components (`Tabs.Root`/`Tabs.Trigger`, `Menu.Root`, `Drawer.Root`, `Switch.Root`, `Field.Root`, `Tag.Root`…), `colorPalette` instead of `colorScheme`, `loading`/`disabled`/`open` instead of `isLoading`/`isDisabled`/`isOpen`, icons as button children, and `asChild` to render a Next `Link` as a `Button`. The system is in `app/theme.tsx` (`createSystem`): body `gray.800`, v2's default heading size, and a dark `border` token of `whiteAlpha.300` (v3's `gray.800` would vanish on the page background). The app is dark-only: `<html className="dark">` in `app/layout.tsx`, no next-themes or color-mode toggle. Toasts: `toaster.create({ title, type })` from `components/ui/toaster.tsx` (rendered once in `providers.tsx`). `app/providers.tsx` keeps its own Emotion cache provider (`compat = true` + `useServerInsertedHTML`) so server-rendered styles don't cause React 19 hydration errors.
+- **Prisma 7** with **PostgreSQL**. The `prisma-client` generator writes the client to `generated/prisma` (gitignored; `postinstall` runs `prisma generate`), so import types and enums from `@/generated/prisma/client`, not `@prisma/client`. `lib/prisma.ts` exports the single `prisma` client, built with the `@prisma/adapter-pg` driver adapter on `DATABASE_URL`; scripts and the seed import it too. The CLI's settings (schema, migrations, seed command, URLs) live in `prisma.config.ts`, which loads `.env` itself with `process.loadEnvFile()` (already-set variables win). `@next-auth/prisma-adapter` is typed against the old `@prisma/client` export, hence the cast in the NextAuth route.
 - **NextAuth 4** (4.24+, supports Next 16) with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
 - Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting). `vercel.json`'s `buildCommand` runs `scripts/vercel-build.sh`: `prisma generate`, then `prisma migrate deploy` only when `VERCEL_ENV=production` (previews share the DB, so they must not migrate it), then `next build`. It fails if `VERCEL_ENV` is missing rather than skip silently. Merging a PR with a migration applies it to production; its preview will error wherever the new schema is used. Don't use a `vercel-build` npm script: the Next.js preset ignores it (that's why migrations never ran before).
-- **Vitest** integration tests for the API routes in `tests/api` and unit tests in `tests/lib`, run against a real Postgres. **GitHub Actions CI** (`.github/workflows/ci.yml`) runs lint, `tsc`, tests (Postgres 17 service container, `TEST_DATABASE_URL` only, no `.env`) and build on every PR and push to `main`. If you add a required env var or setup step for tests or build, add it to the workflow too. ESLint 9 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off). `next build` doesn't run lint.
+- **Vitest** integration tests for the API routes in `tests/api` and unit tests in `tests/lib`, run against a real Postgres. **GitHub Actions CI** (`.github/workflows/ci.yml`) runs lint, `tsc`, tests (Postgres 17 service container, `TEST_DATABASE_URL` only, no `.env`) and build on every PR and push to `main`. If you add a required env var or setup step for tests or build, add it to the workflow too. ESLint 10 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off; `generated/` ignored). Its bundled `eslint-plugin-react`, `-import` and `-jsx-a11y` don't list ESLint 10 in their peer ranges yet, so npm warns `ERESOLVE overriding peer dependency`; they work (checked rule by rule). `next build` doesn't run lint.
 
 ## Commands
 
@@ -23,16 +23,16 @@ npm test             # Vitest integration tests (needs db:up); npm run test:watc
 npm run build        # production build (also the main type check)
 npm run lint         # eslint . (next lint was removed in Next 16)
 npx prisma generate  # regenerate client after schema changes
-npx prisma migrate dev --name <change>   # create + apply a migration locally after editing schema.prisma
+npx prisma migrate dev --name <change>   # create + apply a migration locally after editing schema.prisma (then prisma generate; v7 doesn't run it)
 npx prisma migrate deploy                 # apply pending migrations (Vercel runs this on production deploys)
-npx prisma db seed   # runs prisma/seed.ts with tsx — WIPES the Song table and reloads prisma/data.js
+npx prisma db seed   # runs prisma/seed.ts with tsx (prisma.config.ts; migrate dev/reset no longer seed) — WIPES the Song table and reloads prisma/data.js
 ```
 
 Local setup steps for humans are in `README.md`.
 
 ## Environment variables
 
-`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `DIRECT_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings. In production `DATABASE_URL` is Neon's **pooled** connection (app runtime) and `DIRECT_URL` is the **direct** one (Prisma Migrate only, via `directUrl` in `schema.prisma`; the pooler's transaction mode breaks migrate's advisory lock). `DIRECT_URL` is only needed for Production (previews don't migrate); `vercel-build.sh` fails a production build without it. Anything that runs migrations against another database (like `tests/global-setup.ts`) must override `DIRECT_URL` too, or Prisma falls back to `.env`'s.
+`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `DIRECT_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings. In production `DATABASE_URL` is Neon's **pooled** connection (app runtime) and `DIRECT_URL` is the **direct** one (Prisma CLI only, as `datasource.url` in `prisma.config.ts`; the pooler's transaction mode breaks migrate's advisory lock). `DIRECT_URL` is only needed for Production (previews don't migrate); `vercel-build.sh` fails a production build without it. Anything that runs migrations against another database (like `tests/global-setup.ts`) must override `DIRECT_URL` too, or Prisma falls back to `.env`'s. Prisma 7 rejects a shadow database equal to the main one, so global-setup blanks `SHADOW_DATABASE_URL`.
 
 ## Testing
 
@@ -51,10 +51,11 @@ Local setup steps for humans are in `README.md`.
   - `programs/songs/` — song catalog with usage info; add new songs
   - `api/fullprogram` (POST/PUT/DELETE a whole service) and `api/song` (POST; accepts only `name`, `type` ∈ himno/salmo/canto and optional `number`, 400 otherwise) — route handlers called from client components via `fetch`
   - `api/auth/[...nextauth]/route.ts` — exports `authOptions` (imported by other routes/pages)
-- `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props
+- `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props. Shared pieces: `SongTabs` (one tab per song type; with `addProgramSong`, each song opens a menu to add it to a program), `ProgramSection` (one service section box), `ui/toaster`
 - `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload), `recentDates` (last-30-days usage for `SongList`), `groupByMonth` (history sections by year + month)
 - `lib/useProgramSongs.ts` — state hook for the new/edit service pages; `addSong`/`removeSong` are pure (never mutate state, so reset works)
 - `lib/programs.ts` — server-side program helpers used inside transactions: `addSongDates`, `removeSongDates`, `clearCurrent`, `PROGRAM_TYPES`
+- `prisma.config.ts` — Prisma CLI config; `generated/prisma` — generated client (gitignored)
 - `prisma/` — `schema.prisma`, `migrations/` (baseline `0_init` = schema as of Nov 2026), `seed.ts`, `data.js` (the hymnal catalog: ~280 himnos, ~40 salmos, ~30 cantos)
 
 ## Domain model

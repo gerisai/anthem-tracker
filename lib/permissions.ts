@@ -1,4 +1,4 @@
-import type { Role } from '@prisma/client';
+import type { Role } from '@/generated/prisma/client';
 
 // Who can change what. Shared by the API routes and the UI, so it must stay
 // free of server-only imports.

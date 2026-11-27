@@ -6,7 +6,7 @@ export function SignInButton() {
     const { data: session, status } = useSession();
 
     if (status === 'loading') {
-        return <Button isLoading colorScheme='teal' variant='solid' loadingText='Cargando'></Button>
+        return <Button loading colorPalette='teal' variant='solid' loadingText='Cargando'></Button>
     }
 
     if (status === 'authenticated') {
@@ -20,9 +20,9 @@ export function SignInButton() {
         )
     }
 
-    return <Button colorScheme="teal" color="white" onClick={() => signIn()}>Iniciar Sesión</Button>
+    return <Button colorPalette="teal" color="white" onClick={() => signIn()}>Iniciar Sesión</Button>
 }
 
 export function SignOutButton() {
-    return <Button colorScheme="red" onClick={() => signOut()}>Cerrar Sesión</Button>
+    return <Button colorPalette="red" onClick={() => signOut()}>Cerrar Sesión</Button>
 }

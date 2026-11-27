@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import type { Role, Song } from '@prisma/client';
+import type { Role, Song } from '@/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 

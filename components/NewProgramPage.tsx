@@ -1,12 +1,10 @@
 'use client'
 
-import { 
-  Tabs, TabPanels, TabPanel, TabList, Tab, 
-  FormControl, FormLabel, Switch, Input, 
-  Heading, Divider, Flex, Button, useToast
-} from '@chakra-ui/react'
+import { Switch, Input, Flex, Button } from '@chakra-ui/react'
 import { BiSolidFileBlank, BiRevision } from "react-icons/bi";
-import { SongList } from '@/components/SongList';
+import { SongTabs } from '@/components/SongTabs';
+import { ProgramSection } from '@/components/ProgramSection';
+import { toaster } from '@/components/ui/toaster';
 import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,7 +30,6 @@ export function NewProgramPage({ songs }: { songs: any }) {
   const router = useRouter();
   const { programs, addProgramSong, deleteProgramSong, reset: clearPrograms } = useProgramSongs(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
-  const toast = useToast();
 
   const createProgram = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,7 +55,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
     setIsLoading(false);
 
     if (!res.ok) {
-      toast({ title: 'No se pudo guardar el programa', status: 'error' });
+      toaster.create({ title: 'No se pudo guardar el programa', type: 'error' });
       return;
     }
 
@@ -70,57 +67,34 @@ export function NewProgramPage({ songs }: { songs: any }) {
     mx={8} px={8} py={8} direction="row">
     <Flex color='white' justify="center" align="center" w="50%"
     mx={8} px={8} py={8} direction="column" rounded={6}>
-      <Tabs variant='soft-rounded' colorScheme='teal' size='lg'>
-        <TabList>
-          <Tab>Himnario General</Tab>
-          <Tab>Salmos</Tab>
-          <Tab>Cantos</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-              <SongList addProgramSong={addProgramSong} choosable={true} type='Himno' songs={songs}/>
-          </TabPanel>
-          <TabPanel>
-              <SongList addProgramSong={addProgramSong} choosable={true} type='Salmo' songs={songs}/>
-          </TabPanel>
-          <TabPanel>
-              <SongList addProgramSong={addProgramSong} choosable={true} type='Canto' songs={songs}/>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+      <SongTabs songs={songs} addProgramSong={addProgramSong}/>
     </Flex>
     <Flex color='white' alignItems="center" justify="center" w="50%"
     mx={8} px={8} direction="column">
-        <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
-        <Heading>Recibimiento</Heading>
-        <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList program={programs.recibimiento} programType='recibimiento' deleteProgramSong={deleteProgramSong}/>
-        </Flex>
-        <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
-        <Heading>Matutino</Heading>
-        <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList program={programs.matutino} programType='matutino' deleteProgramSong={deleteProgramSong}/>
-        </Flex>
-        <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
-        <Heading>Vespertino</Heading>
-        <Divider size='lg'variant='dashed' mt={2} mb={6}/>
-          <ProgramSongList program={programs.vespertino} programType='vespertino' deleteProgramSong={deleteProgramSong}/>
-        </Flex>
+        <ProgramSection title='Recibimiento'>
+            <ProgramSongList program={programs.recibimiento} programType='recibimiento' deleteProgramSong={deleteProgramSong}/>
+          </ProgramSection>
+        <ProgramSection title='Matutino'>
+            <ProgramSongList program={programs.matutino} programType='matutino' deleteProgramSong={deleteProgramSong}/>
+          </ProgramSection>
+        <ProgramSection title='Vespertino'>
+            <ProgramSongList program={programs.vespertino} programType='vespertino' deleteProgramSong={deleteProgramSong}/>
+          </ProgramSection>
         <form onSubmit={createProgram}>
         <Flex direction='column' alignItems="center" justify="center" mb={4}>
-            <FormControl display='flex' alignItems='center' my={6} w='30%'>
-              <Input name='date' isRequired={true} variant='flushed' size="lg" type="date"/>
-            </FormControl>
-            <FormControl display='flex' alignItems='center' justifyContent='center' my={6}>
-              <FormLabel htmlFor='isCurrent' mb='0'>
-                Publicar programa?
-              </FormLabel>
-            <Switch name='isCurrent' colorScheme='yellow' size='lg' id='isCurrent'/>
-            </FormControl>
+            <Flex alignItems='center' my={6}>
+              <Input name='date' required variant='flushed' size="lg" type="date" w='auto'/>
+            </Flex>
+            <Switch.Root name='isCurrent' colorPalette='yellow' size='lg' my={6}>
+              <Switch.HiddenInput/>
+              <Switch.Label>Publicar programa?</Switch.Label>
+              {/* The unchecked track defaults to gray.800, the page background */}
+              <Switch.Control bg='gray.600' _checked={{ bg: 'colorPalette.solid' }}/>
+            </Switch.Root>
         </Flex>
         <Flex direction='row' alignItems="center" wrap="wrap" justify="center" mb={4}>
-          <Button size='lg' colorScheme='green' mt={4} mx={2} leftIcon={<BiSolidFileBlank/>} isLoading={isLoading} type='submit'>Guardar</Button>
-          <Button size='lg' colorScheme='yellow' mt={4} mx={2} leftIcon={<BiRevision/>} onClick={clearPrograms}>Reiniciar</Button>
+          <Button size='lg' colorPalette='green' mt={4} mx={2} loading={isLoading} type='submit'><BiSolidFileBlank/> Guardar</Button>
+          <Button size='lg' colorPalette='yellow' mt={4} mx={2} onClick={clearPrograms}><BiRevision/> Reiniciar</Button>
         </Flex>
         </form>
     </Flex>

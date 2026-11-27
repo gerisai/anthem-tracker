@@ -1,21 +1,22 @@
 'use client'
 
-import { Card, CardBody, Text, Button, HStack, Link } from "@chakra-ui/react";
+import { Card, Text, Button, HStack } from "@chakra-ui/react";
+import NextLink from "next/link";
 import { parseDate } from "@/lib/Utils";
 
 export function ProgramRecord({ program }: { program:any }) {
     const formatedDate = parseDate(program.date)
     
     return (
-    <Card background={ program.isCurrent ? 'yellow.600' : 'teal.600'} m={2}>
-        <CardBody>
+    <Card.Root background={ program.isCurrent ? 'yellow.600' : 'teal.600'} m={2}>
+        <Card.Body>
             <HStack>
                 <Text color='white'>{formatedDate}</Text>
-                <Link href={`/programs/history/${program.id}`}>
-                    <Button colorScheme='gray' size="md" variant="solid" px={8}>Ver</Button>
-                </Link>
+                <Button asChild colorPalette='gray' size="md" variant="solid" px={8}>
+                    <NextLink href={`/programs/history/${program.id}`}>Ver</NextLink>
+                </Button>
             </HStack>
-        </CardBody>
-    </Card>
+        </Card.Body>
+    </Card.Root>
     )
 }

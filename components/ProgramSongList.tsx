@@ -1,4 +1,4 @@
-import { Highlight, Flex, Tag } from "@chakra-ui/react";
+import { Highlight, Flex, IconButton } from "@chakra-ui/react";
 import { numberToEmoji } from '@/lib/Utils';
 import { BiTrash } from 'react-icons/bi';
 
@@ -13,10 +13,10 @@ export function ProgramSongList({ program, programType, deleteProgramSong }:{ pr
     return (
         program.songs?.map((song: any, i: number) => (
             <Flex key={song.id} direction='row' alignItems='center'>
-            <Highlight key={song.id} query={`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`} styles={{ px: '3', py: '1', my:'2', rounded: 'full', bg: 'teal.100' }} >
+            <Highlight key={song.id} query={`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`} styles={{ px: '3', py: '1', my:'2', rounded: 'full', bg: 'teal.100', color: 'gray.900' }} >
                 {`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`}
             </Highlight>
-            <Tag key={i} as='button' size='lg' colorScheme='red' borderRadius='full' mx={2} onClick={() => deleteProgramSong(programType,song)}><BiTrash/></Tag>
+            <IconButton aria-label='Quitar canto' size='sm' variant='subtle' colorPalette='red' rounded='full' mx={2} onClick={() => deleteProgramSong(programType,song)}><BiTrash/></IconButton>
             </Flex>
         ))
     )

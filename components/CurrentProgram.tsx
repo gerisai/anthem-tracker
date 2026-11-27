@@ -1,16 +1,18 @@
 'use client'
 
-import { Heading, Divider, Flex, Button, Link, useToast } from '@chakra-ui/react';
+import { Heading, Flex, Button } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import { BiPlus, BiPencil, BiTrash } from "react-icons/bi";
 import AuthCheck from '@/components/AuthCheck';
 import { CurrentProgramSongList } from '@/components/CurrentProgramSongList';
+import { ProgramSection } from '@/components/ProgramSection';
+import { toaster } from '@/components/ui/toaster';
 import { parseDate } from '@/lib/Utils';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function CurrentProgram({ programs, fullProgramId, author }: { programs: any, fullProgramId: string, author: any }) {
     const router = useRouter();
-    const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
     const deleteProgram = async () => {
@@ -28,52 +30,46 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
         setIsLoading(false);
 
         if (!res.ok) {
-            toast({ title: 'No se pudo borrar el programa', status: 'error' });
+            toaster.create({ title: 'No se pudo borrar el programa', type: 'error' });
             return;
         }
 
         router.push('/programs/history');
     }
-    
+
     return (
         <Flex color='white' alignItems="center" justify="center" w="80%"
         mx={8} px={8} direction="column">
             { fullProgramId ?
             <AuthCheck ownerId={author.id}>
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
-                    <Link href={`/programs/history/${fullProgramId}/edit`}><Button colorScheme='yellow' mr={2} leftIcon={<BiPencil/>}>Editar programa</Button></Link>
-                    <Button isLoading={isLoading} colorScheme='red' mr={2} leftIcon={<BiTrash/>} onClick={deleteProgram}>Borrar programa</Button>
+                    <Button asChild colorPalette='yellow' mr={2}><NextLink href={`/programs/history/${fullProgramId}/edit`}><BiPencil/> Editar programa</NextLink></Button>
+                    <Button loading={isLoading} colorPalette='red' mr={2} onClick={deleteProgram}><BiTrash/> Borrar programa</Button>
                 </Flex>
             </AuthCheck>
             :
             <AuthCheck editor>
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
-                  <Link href='/programs/current/new'><Button colorScheme='green' mr={2} leftIcon={<BiPlus/>}>Crear programa</Button></Link>
+                    <Button asChild colorPalette='green' mr={2}><NextLink href='/programs/current/new'><BiPlus/> Crear programa</NextLink></Button>
                 </Flex>
             </AuthCheck>
             }
             {
-                programs.length === 0 ? 
+                programs.length === 0 ?
                 <Heading>No hay programas publicados</Heading>
                 :
                 <>
                 <Heading>{ parseDate(programs[0].date) }</Heading>
-                <Heading size='sm'>Por: {  author.name }</Heading>
-                <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
-                <Heading>Recibimiento</Heading>
-                <Divider size='lg'variant='dashed' mt={2} mb={6}/>
+                <Heading size='md'>Por: {  author.name }</Heading>
+                <ProgramSection title='Recibimiento'>
                     <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'recibimiento')[0]}/>
-                </Flex>
-                <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
-                <Heading>Matutino</Heading>
-                <Divider size='lg'variant='dashed' mt={2} mb={6}/>
+                </ProgramSection>
+                <ProgramSection title='Matutino'>
                     <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'matutino')[0]}/>
-                </Flex>
-                <Flex alignItems="center" justify="center" direction="column" background="gray.700" m={4}p={8} rounded={6} w="80%">
-                <Heading>Vespertino</Heading>
-                <Divider size='lg'variant='dashed' mt={2} mb={6}/>
+                </ProgramSection>
+                <ProgramSection title='Vespertino'>
                     <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'vespertino')[0]}/>
-                </Flex>
+                </ProgramSection>
                 </>
             }
         </Flex>
