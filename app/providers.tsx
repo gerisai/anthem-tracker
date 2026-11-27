@@ -6,7 +6,8 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { SessionProvider } from 'next-auth/react';
 import { useServerInsertedHTML } from 'next/navigation'
 import { useState } from 'react'
-import theme from './theme'
+import { Toaster } from '@/components/ui/toaster'
+import { system } from './theme'
 
 // Emotion cache for the App Router: styles rendered on the server are collected
 // and flushed into the HTML stream instead of being inlined next to elements,
@@ -36,8 +37,9 @@ export function Providers({
   return (
     <SessionProvider>
       <EmotionCacheProvider>
-        <ChakraProvider theme={theme}>
+        <ChakraProvider value={system}>
           {children}
+          <Toaster/>
         </ChakraProvider>
       </EmotionCacheProvider>
     </SessionProvider>

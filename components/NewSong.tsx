@@ -1,25 +1,11 @@
 'use client'
 
-import {
-    Drawer,
-    DrawerBody,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
-    Button,
-    Input,
-    FormControl,
-    FormLabel,
-    Select,
-    useToast
-} from '@chakra-ui/react';
+import { Drawer, Portal, CloseButton, Button, Input, Field, NativeSelect } from '@chakra-ui/react';
 import { useState } from 'react';
+import { toaster } from '@/components/ui/toaster';
 
-export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose: any, btnRef: any }) {
+export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose: () => void, btnRef: React.RefObject<HTMLButtonElement | null> }) {
   const [isLoading, setIsLoading ] = useState(false);
-  const toast = useToast();
 
   const createSong = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,50 +29,62 @@ export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose:
     setIsLoading(false);
 
     if (!res.ok) {
-      toast({ title: 'No se pudo guardar el canto', status: 'error' });
+      toaster.create({ title: 'No se pudo guardar el canto', type: 'error' });
       return;
     }
 
     onClose();
     location.reload();
   }
-  
+
   return (
-        <Drawer
-            isOpen={isOpen}
-            placement='right'
-            onClose={onClose}
-            finalFocusRef={btnRef}
+        <Drawer.Root
+            open={isOpen}
+            placement='end'
+            onOpenChange={(e) => { if (!e.open) onClose(); }}
+            finalFocusEl={() => btnRef.current}
             size='lg'
         >
-        <DrawerOverlay />
-        <form onSubmit={createSong}>
-        <DrawerContent background='gray.700' color='white'>
-          <DrawerCloseButton />
-          <DrawerHeader>Nuevo canto</DrawerHeader>
+        <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+        <Drawer.Content asChild background='gray.700' color='white'>
+          <form onSubmit={createSong}>
+          <Drawer.Header>
+            <Drawer.Title>Nuevo canto</Drawer.Title>
+          </Drawer.Header>
 
-          <DrawerBody>
-            <FormControl isRequired mb={4}>
-                <FormLabel>Nombre</FormLabel>
-                    <Input name='name' placeholder='Hay un pais'/>
-            </FormControl>
-            <FormControl isRequired mb={4}>
-                <FormLabel>Tipo</FormLabel>
-                <Select name='type'>
-                    <option value='salmo'>Salmo</option>
-                    <option value='canto'>Canto</option>
-                </Select>
-            </FormControl>
-          </DrawerBody>
+          <Drawer.Body>
+            <Field.Root required mb={4}>
+                <Field.Label>Nombre <Field.RequiredIndicator /></Field.Label>
+                <Input name='name' placeholder='Hay un pais'/>
+            </Field.Root>
+            <Field.Root required mb={4}>
+                <Field.Label>Tipo <Field.RequiredIndicator /></Field.Label>
+                <NativeSelect.Root>
+                    <NativeSelect.Field name='type'>
+                        <option value='salmo'>Salmo</option>
+                        <option value='canto'>Canto</option>
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                </NativeSelect.Root>
+            </Field.Root>
+          </Drawer.Body>
 
-          <DrawerFooter>
-            <Button mr={3} onClick={onClose} colorScheme='red'>
+          <Drawer.Footer>
+            <Button mr={3} onClick={onClose} colorPalette='red'>
               Cancelar
             </Button>
-            <Button isLoading={isLoading}  type='submit' colorScheme='teal'>Guardar</Button>
-          </DrawerFooter>
-        </DrawerContent>
-        </form>
-      </Drawer>
+            <Button loading={isLoading} type='submit' colorPalette='teal'>Guardar</Button>
+          </Drawer.Footer>
+
+          <Drawer.CloseTrigger asChild>
+            <CloseButton size='sm' />
+          </Drawer.CloseTrigger>
+          </form>
+        </Drawer.Content>
+        </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     )
 }

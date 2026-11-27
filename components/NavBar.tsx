@@ -10,9 +10,9 @@ export function NavBar() {
     <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" background="gray.700"
     mb={8} p={8}>
         <Stack direction="row">
-            <Link href='/programs/current'><Button size="lg" color="white" variant="link" px={8}>Programas</Button></Link>
-            <Link href='/programs/songs'><Button size="lg" color="white" variant="link" px={8}>Cantos</Button></Link>
-            <Link href='/programs/history'><Button size="lg" color="white" variant="link" px={8}>Histórico</Button></Link>
+            <Button asChild size="lg" color="white" variant="plain" px={8}><Link href='/programs/current'>Programas</Link></Button>
+            <Button asChild size="lg" color="white" variant="plain" px={8}><Link href='/programs/songs'>Cantos</Link></Button>
+            <Button asChild size="lg" color="white" variant="plain" px={8}><Link href='/programs/history'>Histórico</Link></Button>
         </Stack>
         <Stack direction="row">
             <SignInButton/>
