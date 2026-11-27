@@ -82,7 +82,7 @@ npm test             # or npm run test:watch
 
 These are Vitest tests: integration tests for the API routes (`tests/api`) and unit tests for helpers (`tests/lib`). They run against the `anthem_test` database, which every test empties, so Postgres must be running (`npm run db:up`). The logged-in user is mocked; see `tests/helpers.ts` (`logInAs`, `logOut`).
 
-**CI.** `.github/workflows/ci.yml` runs on every pull request and push to `main`, on GitHub Actions, so it doesn't use Vercel build minutes. It runs `npm ci`, `prisma generate`, lint, `tsc --noEmit`, `npm test` against a fresh Postgres 17 service container, and `npm run build`, on the Node version from `engines.node`.
+**CI.** `.github/workflows/ci.yml` runs on every pull request and push to `main`, on GitHub Actions, so it doesn't use Vercel build minutes. It runs `npm ci` (whose `postinstall` runs `prisma generate`), lint, `tsc --noEmit`, `npm test` against a fresh Postgres 17 service container, and `npm run build`, on the Node version from `engines.node`.
 
 ## Production environment variables (Vercel)
 
@@ -97,4 +97,4 @@ Migrations need the direct connection, because the pooler runs in transaction mo
 
 ## Database changes
 
-Edit `prisma/schema.prisma`, then run `npx prisma migrate dev --name <change>` and commit the new folder in `prisma/migrations`. Production deploys apply pending migrations (`scripts/vercel-build.sh`, the build command in `vercel.json`) over `DIRECT_URL`. Preview deploys don't, because they use the production database, so a PR's preview fails wherever it uses the new schema until the PR is merged.
+Edit `prisma/schema.prisma`, then run `npx prisma migrate dev --name <change>` and `npx prisma generate` (Prisma 7's `migrate dev` no longer regenerates the client), and commit the new folder in `prisma/migrations`. Production deploys apply pending migrations (`scripts/vercel-build.sh`, the build command in `vercel.json`) over `DIRECT_URL`. Preview deploys don't, because they use the production database, so a PR's preview fails wherever it uses the new schema until the PR is merged.

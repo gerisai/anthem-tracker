@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import type { User } from '@prisma/client';
+import type { User } from '@/generated/prisma/client';
 import { getCurrentUser, unauthorized, forbidden, notFound } from '@/lib/auth';
 import { canCreate, canModify } from '@/lib/permissions';
 import { PROGRAM_TYPES, ProgramInput, addSongDates, removeSongDates, clearCurrent } from '@/lib/programs';

@@ -47,8 +47,7 @@ jobs:
           node-version-file: package.json  # engines.node, same as Vercel
           cache: npm
 
-      - run: npm ci
-      - run: npx prisma generate
+      - run: npm ci  # postinstall runs prisma generate
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm test

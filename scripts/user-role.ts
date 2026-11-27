@@ -4,9 +4,9 @@
 //   npm run user:role -- <email|id> <role>  # set a role
 // Uses DATABASE_URL from the environment, falling back to .env. For production:
 //   DATABASE_URL="<production url>" npm run user:role -- you@example.com admin
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '../generated/prisma/client';
+import { prisma } from '../lib/prisma';
 
-const prisma = new PrismaClient();
 const roles = Object.values(Role);
 
 const main = async () => {

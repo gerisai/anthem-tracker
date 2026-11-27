@@ -2,7 +2,8 @@
 // the cookie to log in as that user, without going through GitHub or Google.
 // Usage: npm run dev:login [-- "Name" [viewer|editor|admin]]   (role defaults to editor)
 import { randomBytes } from 'node:crypto';
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '../generated/prisma/client';
+import { prisma } from '../lib/prisma';
 
 const url = new URL(process.env.DATABASE_URL ?? '');
 
@@ -11,8 +12,6 @@ if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) {
   console.error(`Refusing to run: DATABASE_URL points to ${url.hostname}, not a local database.`);
   process.exit(1);
 }
-
-const prisma = new PrismaClient();
 
 const main = async () => {
   const name = process.argv[2] ?? 'Dev User';
