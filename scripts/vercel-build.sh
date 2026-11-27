@@ -14,6 +14,10 @@ if [ -z "${VERCEL_ENV:-}" ]; then
 fi
 
 if [ "$VERCEL_ENV" = "production" ]; then
+  if [ -z "${DIRECT_URL:-}" ]; then
+    echo "DIRECT_URL is not set. Add Neon's direct (non-pooled) connection string as DIRECT_URL for Production in the Vercel project settings." >&2
+    exit 1
+  fi
   echo "Production deploy: applying migrations"
   npx prisma migrate deploy
 else

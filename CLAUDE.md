@@ -9,7 +9,7 @@ Anthem Tracker ("Programación de Cantos"): a Next.js app for planning which son
 - **Prisma 5** (6+ changes the setup; upgrade separately) with **PostgreSQL** (`lib/prisma.ts` exports a single `prisma` client)
 - **NextAuth 4** (4.24+, supports Next 16) with Prisma adapter, GitHub + Google providers; custom sign-in page at `/login`
 - Hosted on **Vercel**; Node.js version is pinned via `engines` in `package.json` (overrides the Vercel project setting). `vercel.json`'s `buildCommand` runs `scripts/vercel-build.sh`: `prisma generate`, then `prisma migrate deploy` only when `VERCEL_ENV=production` (previews share the DB, so they must not migrate it), then `next build`. It fails if `VERCEL_ENV` is missing rather than skip silently. Merging a PR with a migration applies it to production; its preview will error wherever the new schema is used. Don't use a `vercel-build` npm script: the Next.js preset ignores it (that's why migrations never ran before).
-- **Vitest** integration tests for the API routes in `tests/api`, run against a real local Postgres. ESLint 9 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off). `next build` doesn't run lint.
+- **Vitest** integration tests for the API routes in `tests/api` and unit tests in `tests/lib`, run against a real Postgres. **GitHub Actions CI** (`.github/workflows/ci.yml`) runs lint, `tsc`, tests (Postgres 17 service container, `TEST_DATABASE_URL` only, no `.env`) and build on every PR and push to `main`. If you add a required env var or setup step for tests or build, add it to the workflow too. ESLint 9 flat config in `eslint.config.mjs` (`eslint-config-next`; `no-explicit-any` off). `next build` doesn't run lint.
 
 ## Commands
 
@@ -32,7 +32,7 @@ Local setup steps for humans are in `README.md`.
 
 ## Environment variables
 
-`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings.
+`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `DIRECT_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings. In production `DATABASE_URL` is Neon's **pooled** connection (app runtime) and `DIRECT_URL` is the **direct** one (Prisma Migrate only, via `directUrl` in `schema.prisma`; the pooler's transaction mode breaks migrate's advisory lock). `DIRECT_URL` is only needed for Production (previews don't migrate); `vercel-build.sh` fails a production build without it. Anything that runs migrations against another database (like `tests/global-setup.ts`) must override `DIRECT_URL` too, or Prisma falls back to `.env`'s.
 
 ## Testing
 
@@ -44,7 +44,7 @@ Local setup steps for humans are in `README.md`.
 ## Layout
 
 - `app/` — routes
-  - `page.tsx` — home (just the NavBar)
+  - `/` has no page: `next.config.js` redirects it (307, not permanent) to `/programs/current`. A config redirect runs in Vercel's routing layer without invoking a function. Login's `callbackUrl: '/'` therefore lands on the current program.
   - `login/` — custom NextAuth sign-in page
   - `programs/current/` — the current service program; `current/new/` creates one (auth required)
   - `programs/history/` — list of all FullPrograms; `[id]/` view, `[id]/edit/` edit (auth required)

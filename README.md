@@ -80,8 +80,21 @@ DATABASE_URL="<production url>" npm run user:role -- you@example.com admin
 npm test             # or npm run test:watch
 ```
 
-These are Vitest integration tests for the API routes (`tests/api`). They run against the `anthem_test` database, which every test empties, so Postgres must be running (`npm run db:up`). The logged-in user is mocked; see `tests/helpers.ts` (`logInAs`, `logOut`).
+These are Vitest tests: integration tests for the API routes (`tests/api`) and unit tests for helpers (`tests/lib`). They run against the `anthem_test` database, which every test empties, so Postgres must be running (`npm run db:up`). The logged-in user is mocked; see `tests/helpers.ts` (`logInAs`, `logOut`).
+
+**CI.** `.github/workflows/ci.yml` runs on every pull request and push to `main`, on GitHub Actions, so it doesn't use Vercel build minutes. It runs `npm ci`, `prisma generate`, lint, `tsc --noEmit`, `npm test` against a fresh Postgres 17 service container, and `npm run build`, on the Node version from `engines.node`.
+
+## Production environment variables (Vercel)
+
+The database is Neon. Set both URLs for the **Production** environment:
+
+| Variable | Value | Used by |
+|---|---|---|
+| `DATABASE_URL` | Neon's **pooled** connection string (host contains `-pooler`) | The app |
+| `DIRECT_URL` | Neon's **direct** connection string (same host without `-pooler`) | `prisma migrate deploy` during production builds |
+
+Migrations need the direct connection, because the pooler runs in transaction mode and breaks Prisma's migration lock. A production build fails with a clear message if `DIRECT_URL` is missing. Previews don't run migrations, so they don't need it. Also set `NEXTAUTH_URL`, `NEXTAUTH_SECRET` and the OAuth credentials.
 
 ## Database changes
 
-Edit `prisma/schema.prisma`, then run `npx prisma migrate dev --name <change>` and commit the new folder in `prisma/migrations`. Production deploys apply pending migrations (`scripts/vercel-build.sh`, the build command in `vercel.json`). Preview deploys don't, because they use the production database, so a PR's preview fails wherever it uses the new schema until the PR is merged.
+Edit `prisma/schema.prisma`, then run `npx prisma migrate dev --name <change>` and commit the new folder in `prisma/migrations`. Production deploys apply pending migrations (`scripts/vercel-build.sh`, the build command in `vercel.json`) over `DIRECT_URL`. Preview deploys don't, because they use the production database, so a PR's preview fails wherever it uses the new schema until the PR is merged.
