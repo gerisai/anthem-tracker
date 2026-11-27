@@ -4,6 +4,7 @@ import { Flex, Heading, Button } from "@chakra-ui/react"
 import { BiLogoGithub } from "react-icons/bi";
 import { FcGoogle } from "react-icons/fc";
 import { signIn } from 'next-auth/react'
+import { LogoMark } from '@/components/Logo'
 
 export default function SignIn({ providers }: { providers: any}){
     const providerTheming: any = {
@@ -20,7 +21,10 @@ export default function SignIn({ providers }: { providers: any}){
     return (
     <Flex minH="100dvh" alignItems="center" justifyContent="center" px={4}>
         <Flex direction="column" background="surface" p={{ base: 6, md: 12 }} rounded="lg" shadow="sm" w="100%" maxW="sm">
-            <Heading mb={6}>Iniciar Sesión</Heading>
+            <Flex direction="column" align="center" gap={3} mb={6}>
+                <LogoMark size={64} title="Programación de Cantos"/>
+                <Heading>Iniciar Sesión</Heading>
+            </Flex>
             {
                 Object.values(providers).map((provider: any) => (
                     <Button 

@@ -45,6 +45,7 @@ Local setup steps for humans are in `README.md`.
 
 - `app/` — routes
   - `/` has no page: `next.config.js` redirects it (307, not permanent) to `/programs/current`. A config redirect runs in Vercel's routing layer without invoking a function. Login's `callbackUrl: '/'` therefore lands on the current program.
+  - `icon.svg` (favicon) and `apple-icon.tsx` (iOS home-screen PNG via `next/og`): Next's file conventions add the `<link>` tags. Both draw `components/Logo.tsx`'s mark (three bars and a note on teal `#0d9488`); `icon.svg` is a copy of its `small` drawing, so change both together.
   - `login/` — custom NextAuth sign-in page
   - `programs/current/` — the current service program; `current/new/` creates one (auth required)
   - `programs/history/` — list of all FullPrograms; `[id]/` view, `[id]/edit/` edit (auth required)
