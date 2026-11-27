@@ -1,0 +1,55 @@
+# Lint, type-check, run the integration tests against a throwaway Postgres, and
+# build. Runs on GitHub Actions, so it doesn't use Vercel build minutes.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or PR cancels the older run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: anthem_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+
+    env:
+      # tests/global-setup.ts migrates this database; every test empties it
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/anthem_test
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json  # engines.node, same as Vercel
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
+      - run: npm run build

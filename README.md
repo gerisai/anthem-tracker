@@ -80,7 +80,9 @@ DATABASE_URL="<production url>" npm run user:role -- you@example.com admin
 npm test             # or npm run test:watch
 ```
 
-These are Vitest integration tests for the API routes (`tests/api`). They run against the `anthem_test` database, which every test empties, so Postgres must be running (`npm run db:up`). The logged-in user is mocked; see `tests/helpers.ts` (`logInAs`, `logOut`).
+These are Vitest tests: integration tests for the API routes (`tests/api`) and unit tests for helpers (`tests/lib`). They run against the `anthem_test` database, which every test empties, so Postgres must be running (`npm run db:up`). The logged-in user is mocked; see `tests/helpers.ts` (`logInAs`, `logOut`).
+
+**CI.** `.github/workflows/ci.yml` runs on every pull request and push to `main`, on GitHub Actions, so it doesn't use Vercel build minutes. It runs `npm ci`, `prisma generate`, lint, `tsc --noEmit`, `npm test` against a fresh Postgres 17 service container, and `npm run build`, on the Node version from `engines.node`.
 
 ## Production environment variables (Vercel)
 
