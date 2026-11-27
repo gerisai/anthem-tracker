@@ -11,6 +11,7 @@ import { ProgramSongList } from '@/components/ProgramSongList';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toProgramInputs } from '@/lib/Utils';
+import { useProgramSongs } from '@/lib/useProgramSongs';
 
 const initialPrograms: any = {
   recibimiento: {
@@ -29,26 +30,9 @@ const initialPrograms: any = {
 
 export function NewProgramPage({ songs }: { songs: any }) {
   const router = useRouter();
-  const [programs, setPrograms]: [any,any] = useState(initialPrograms);
+  const { programs, addProgramSong, deleteProgramSong, reset: clearPrograms } = useProgramSongs(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
   const toast = useToast();
-
-  const addProgramSong = (program: string, song: any) => {
-    programs[program].songs = [...programs[program].songs, song];
-    const newPrograms = Object.assign({},programs);
-    setPrograms(newPrograms);
-  }
-
-  const deleteProgramSong = (program: string, song: any) => {
-    programs[program].songs = programs[program].songs.filter((s: any) => s.id !== song.id)
-    const newPrograms = Object.assign({},programs);
-    setPrograms(newPrograms);
-  }
-
-  const clearPrograms = () => {
-    const newPrograms = Object.assign({},initialPrograms);
-    setPrograms(newPrograms);
-  }
 
   const createProgram = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +62,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
       return;
     }
 
-    router.push('/programs/history?refresh=true');
+    router.push('/programs/history');
   }
 
   return (

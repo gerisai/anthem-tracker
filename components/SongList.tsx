@@ -2,16 +2,15 @@
 
 import { Flex, Heading, List, ListItem, Badge, Tag, TagLabel, Menu, MenuList, MenuItem, Tooltip } from "@chakra-ui/react";
 import { MenuButtonSong } from '@/components/MenuButton';
-import { parseDate, repeatColors, sortFns } from '@/lib/Utils';
-
-
+import { Fragment, useState } from 'react';
+import { parseDate, recentDates, repeatColors, sortFns } from '@/lib/Utils';
 
 export function SongList({ type, songs, choosable, addProgramSong }: {type: string, songs: Array<any>, choosable: boolean, addProgramSong: any }) {
     const filteredSongs = songs.filter((song) => song.type === type.toLowerCase());
 
     filteredSongs.sort(sortFns[type.toLowerCase()]);
-    const OFFSET = 30 * 24 * 60 * 60 * 1000;
-    const referenceDate = new Date(Date.now() - OFFSET).getTime();
+    // Read the clock once per mount, not on every render
+    const [now] = useState(() => Date.now());
 
     return (
     <>
@@ -20,14 +19,8 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
         <List color='white' spacing={3}>
         {
             filteredSongs.map((song: any, i: number) => {
-                const repeats = song.dates.reduce((acc: number, date: any) => {
-                    if(date.getTime() - referenceDate > 0) {
-                        return acc + 1
-                    }
-                    return acc
-                },0);
-
-                const validDates = song.dates.filter((d: any) => d.getTime() - referenceDate > 0)
+                const validDates = recentDates(song.dates, now);
+                const repeats = validDates.length;
 
                 const color = repeatColors[repeats] || 'red';
                 
@@ -41,14 +34,12 @@ export function SongList({ type, songs, choosable, addProgramSong }: {type: stri
                             </Tag>
                         </MenuButtonSong>
                         <Tooltip placement='right' label={
-                            validDates.map((d: any) => {
-                                return (
-                                    <>
-                                        {parseDate(d)}
-                                        <br/>
-                                    </>
-                                )
-                            })
+                            validDates.map((d: Date, j: number) => (
+                                <Fragment key={j}>
+                                    {parseDate(d)}
+                                    <br/>
+                                </Fragment>
+                            ))
                         }
                         hasArrow
                         offset={[0,20]}>

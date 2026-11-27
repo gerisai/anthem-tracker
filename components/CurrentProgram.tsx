@@ -32,7 +32,7 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
             return;
         }
 
-        router.push('/programs/history?refresh=true');
+        router.push('/programs/history');
     }
     
     return (
