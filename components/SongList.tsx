@@ -1,17 +1,58 @@
 'use client'
 
-import { Box, Circle, Flex, Float, Heading, List, Badge, Tag, Menu, Tooltip, Portal } from "@chakra-ui/react";
+import { Box, Circle, Flex, Float, Heading, List, Badge, Tag, Tooltip, Portal } from "@chakra-ui/react";
+import { useDraggable } from '@dnd-kit/core';
 import { Fragment, useState } from 'react';
 import { parseDate, recentDates, repeatColors, sortFns } from '@/lib/Utils';
 
-const PROGRAM_TYPES = [
-    { value: 'recibimiento', label: 'Recibimiento' },
-    { value: 'matutino', label: 'Matutino' },
-    { value: 'vespertino', label: 'Vespertino' },
-];
+// What a dragged song carries to the drop handler (ProgramEditor) and its overlay
+export type DraggedSong = { song: any, number: number | string, color: string };
 
-// With `addProgramSong`, clicking a song opens a menu to add it to a program
-export function SongList({ type, songs, addProgramSong }: {type: string, songs: Array<any>, addProgramSong?: (programType: string, song: any) => void }) {
+// A catalog song: its number and name, outlined in its usage color
+export function SongTag({ song, number, color, extraEnd, ...rest }: DraggedSong & { extraEnd?: boolean } & Tag.RootProps) {
+    return (
+        <Tag.Root size='lg' borderRadius='full' variant='outline' colorPalette={color} maxW='100%'
+        pe={extraEnd ? 4 : undefined} {...rest}>
+            <Badge colorPalette={color} mr={2}>{number}</Badge>
+            {/* v3 clamps tag labels to one truncated line; show full names as v2 did */}
+            <Tag.Label lineClamp='unset'>{song.name}</Tag.Label>
+        </Tag.Root>
+    );
+}
+
+// Keys that add the focused song to a section without dragging
+const SECTION_KEYS: Record<string, string> = { '1': 'recibimiento', '2': 'matutino', '3': 'vespertino' };
+
+// Drag handle around a SongTag (new/edit service pages). Mouse drags start after
+// moving a few pixels; touch drags after a press-and-hold, so the list still
+// scrolls (sensors in ProgramEditor). The original stays in place, faded, while
+// a DragOverlay copy follows the pointer out of the scrolling list. Keyboard:
+// focus the song and press 1/2/3.
+function DraggableSong({ data, onAddSong, children }: { data: DraggedSong, onAddSong: (programType: string, song: any) => void, children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: data.song.id, data });
+
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        const type = SECTION_KEYS[e.key];
+        if (type) {
+            e.preventDefault();
+            onAddSong(type, data.song);
+        }
+    };
+
+    return (
+        <Box ref={setNodeRef} {...listeners} {...attributes} onKeyDown={onKeyDown} aria-roledescription='canto arrastrable'
+        cursor={isDragging ? 'grabbing' : 'grab'} opacity={isDragging ? 0.4 : 1} maxW='100%'
+        userSelect='none' css={{ WebkitTouchCallout: 'none' }} rounded='full'
+        _focusVisible={{ outline: '2px solid', outlineColor: 'teal.solid', outlineOffset: '2px' }}>
+            {children}
+        </Box>
+    );
+}
+
+// With `onAddSong`, songs can be dragged onto a section of the service being
+// edited (the DndContext lives in ProgramEditor) or added with 1/2/3; without
+// it, the list is read-only
+export function SongList({ type, songs, onAddSong }: {type: string, songs: Array<any>, onAddSong?: (programType: string, song: any) => void }) {
     const filteredSongs = songs.filter((song) => song.type === type.toLowerCase());
 
     filteredSongs.sort(sortFns[type.toLowerCase()]);
@@ -31,14 +72,8 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
 
                 const color = repeatColors[repeats] || 'red';
 
-                const songTag = (
-                    <Tag.Root size='lg' borderRadius='full' variant='outline' colorPalette={color} maxW='100%'
-                    pe={repeats > 0 ? 4 : undefined}>
-                        <Badge colorPalette={color} mr={2}>{song.number || i + 1}</Badge>
-                        {/* v3 clamps tag labels to one truncated line; show full names as v2 did */}
-                        <Tag.Label lineClamp='unset'>{song.name}</Tag.Label>
-                    </Tag.Root>
-                );
+                const data: DraggedSong = { song, number: song.number || i + 1, color };
+                const songTag = <SongTag {...data} extraEnd={repeats > 0}/>;
 
                 // Uses in the last 30 days, as a notification-style count on the
                 // tag's corner (the tag gets extra end padding so it doesn't cover the name); hidden when 0 (the teal outline already says so).
@@ -73,23 +108,7 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
                 return (
                     <List.Item key={song.id}>
                     <Box position='relative' display='inline-flex' maxW='100%'>
-                    {
-                        addProgramSong ?
-                        <Menu.Root>
-                            <Menu.Trigger cursor='pointer' maxW='100%'>{songTag}</Menu.Trigger>
-                            <Portal>
-                                <Menu.Positioner>
-                                    <Menu.Content background='surface' borderColor='border'>
-                                        {PROGRAM_TYPES.map(({ value, label }) => (
-                                            <Menu.Item key={value} value={value} _hover={{ bg: 'surface.hover' }} onClick={() => addProgramSong(value, song)}>{label}</Menu.Item>
-                                        ))}
-                                    </Menu.Content>
-                                </Menu.Positioner>
-                            </Portal>
-                        </Menu.Root>
-                        :
-                        songTag
-                    }
+                    {onAddSong ? <DraggableSong data={data} onAddSong={onAddSong}>{songTag}</DraggableSong> : songTag}
                     {usageBadge}
                     </Box>
                     </List.Item>

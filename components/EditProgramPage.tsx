@@ -11,28 +11,18 @@ export function EditProgramPage({ songs, existingPrograms, fullProgramId }: { so
   const router = useRouter();
   const existingDate = parseDateISO(existingPrograms[0].date)
 
-  const initialPrograms: any = {
-    recibimiento: {
-        id: existingPrograms.filter( (program : any) => program.type === 'recibimiento')[0].id,
-        type: 'recibimiento',
-        songs: existingPrograms.filter( (program : any) => program.type === 'recibimiento')[0].songs,
-        order: existingPrograms.filter( (program : any) => program.type === 'recibimiento')[0].order,
-    },
-    matutino: {
-        id: existingPrograms.filter( (program : any) => program.type === 'matutino')[0].id,
-        type: 'matutino',
-        songs: existingPrograms.filter( (program : any) => program.type === 'matutino')[0].songs,
-        order: existingPrograms.filter( (program : any) => program.type === 'matutino')[0].order,
-    },
-    vespertino: {
-        id: existingPrograms.filter( (program : any) => program.type === 'vespertino')[0].id,
-        type: 'vespertino',
-        songs: existingPrograms.filter( (program : any) => program.type === 'vespertino')[0].songs,
-        order: existingPrograms.filter( (program : any) => program.type === 'vespertino')[0].order,
-    },
-  }
+  // One entry per section, its songs in their saved order. The state keeps no
+  // `order`: toProgramInputs rebuilds it from the song list on save.
+  const initialPrograms: any = Object.fromEntries(
+    ['recibimiento', 'matutino', 'vespertino'].map((type) => {
+      const program = existingPrograms.find((p: any) => p.type === type);
+      const order = program.order ?? {};
+      const songs = [...program.songs].sort((a: any, b: any) => order[a.name] - order[b.name]);
+      return [type, { id: program.id, type, songs }];
+    })
+  );
 
-  const { programs, addProgramSong, deleteProgramSong, reset: restorePrograms } = useProgramSongs(initialPrograms);
+  const { programs, addProgramSong, moveProgramSong, deleteProgramSong, reset: restorePrograms } = useProgramSongs(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
 
   const createProgram = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,7 +58,7 @@ export function EditProgramPage({ songs, existingPrograms, fullProgramId }: { so
   }
 
   return (
-    <ProgramEditor songs={songs} programs={programs} addProgramSong={addProgramSong} deleteProgramSong={deleteProgramSong}
+    <ProgramEditor songs={songs} programs={programs} addProgramSong={addProgramSong} moveProgramSong={moveProgramSong} deleteProgramSong={deleteProgramSong}
     onSubmit={createProgram} onReset={restorePrograms} resetLabel='Restaurar' isLoading={isLoading}
     defaultDate={existingDate} defaultIsCurrent={existingPrograms[0].isCurrent}/>
   )

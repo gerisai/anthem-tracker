@@ -24,7 +24,7 @@ const initialPrograms: any = {
 
 export function NewProgramPage({ songs }: { songs: any }) {
   const router = useRouter();
-  const { programs, addProgramSong, deleteProgramSong, reset: clearPrograms } = useProgramSongs(initialPrograms);
+  const { programs, addProgramSong, moveProgramSong, deleteProgramSong, reset: clearPrograms } = useProgramSongs(initialPrograms);
   const [isLoading, setIsLoading ] = useState(false);
 
   const createProgram = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -59,7 +59,7 @@ export function NewProgramPage({ songs }: { songs: any }) {
   }
 
   return (
-    <ProgramEditor songs={songs} programs={programs} addProgramSong={addProgramSong} deleteProgramSong={deleteProgramSong}
+    <ProgramEditor songs={songs} programs={programs} addProgramSong={addProgramSong} moveProgramSong={moveProgramSong} deleteProgramSong={deleteProgramSong}
     onSubmit={createProgram} onReset={clearPrograms} resetLabel='Reiniciar' isLoading={isLoading}/>
   )
 }

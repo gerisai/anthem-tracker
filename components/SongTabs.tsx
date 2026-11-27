@@ -9,9 +9,9 @@ const TYPES = [
   { value: 'canto', type: 'Canto', label: 'Cantos' },
 ];
 
-// One tab per song type. With `addProgramSong`, each song opens a menu to add it
-// to a program (new/edit service pages); without it, the list is read-only.
-export function SongTabs({ songs, addProgramSong }: { songs: any, addProgramSong?: (programType: string, song: any) => void }) {
+// One tab per song type. With `onAddSong` (new/edit service pages), songs can be
+// dragged onto a section or added with the keyboard; without it, read-only.
+export function SongTabs({ songs, onAddSong }: { songs: any, onAddSong?: (programType: string, song: any) => void }) {
   return (
     <Tabs.Root defaultValue='himno' variant='subtle' colorPalette='teal' size={{ base: 'md', md: 'lg' }} w='100%'>
       <Tabs.List flexWrap='wrap'>
@@ -21,7 +21,7 @@ export function SongTabs({ songs, addProgramSong }: { songs: any, addProgramSong
       </Tabs.List>
       {TYPES.map(({ value, type }) => (
         <Tabs.Content key={value} value={value}>
-          <SongList addProgramSong={addProgramSong} type={type} songs={songs}/>
+          <SongList onAddSong={onAddSong} type={type} songs={songs}/>
         </Tabs.Content>
       ))}
     </Tabs.Root>
