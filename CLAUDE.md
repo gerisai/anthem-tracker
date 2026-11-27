@@ -44,7 +44,7 @@ Local setup steps for humans are in `README.md`.
 ## Layout
 
 - `app/` — routes
-  - `page.tsx` — home (just the NavBar)
+  - `/` has no page: `next.config.js` redirects it (307, not permanent) to `/programs/current`. A config redirect runs in Vercel's routing layer without invoking a function. Login's `callbackUrl: '/'` therefore lands on the current program.
   - `login/` — custom NextAuth sign-in page
   - `programs/current/` — the current service program; `current/new/` creates one (auth required)
   - `programs/history/` — list of all FullPrograms; `[id]/` view, `[id]/edit/` edit (auth required)
