@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Circle, Flex, Float, Heading, List, Badge, Tag, Tooltip, Portal } from "@chakra-ui/react";
+import { Box, Circle, Flex, Float, Heading, List, Badge, Tag, Popover, Portal } from "@chakra-ui/react";
 import { useDraggable } from '@dnd-kit/core';
 import { Fragment, useState } from 'react';
 import { parseDate, recentDates, repeatColors, sortFns } from '@/lib/Utils';
@@ -17,6 +17,44 @@ export function SongTag({ song, number, color, extraEnd, ...rest }: DraggedSong 
             {/* v3 clamps tag labels to one truncated line; show full names as v2 did */}
             <Tag.Label lineClamp='unset'>{song.name}</Tag.Label>
         </Tag.Root>
+    );
+}
+
+// Uses in the last 30 days, as a small count on a song's corner. Its dates open
+// in a popover on hover (mouse) and on click/tap (touch, where tooltips never
+// open). A popover rather than a tooltip: it also closes on an outside tap or
+// Escape. The ::before widens the tap target past the 20px circle.
+function UsageBadge({ repeats, dates, color }: { repeats: number, dates: Date[], color: string }) {
+    const [open, setOpen] = useState(false);
+    const hover = (next: boolean) => (e: React.PointerEvent) => { if (e.pointerType === 'mouse') setOpen(next); };
+
+    return (
+        <Popover.Root open={open} onOpenChange={(e) => setOpen(e.open)} autoFocus={false} lazyMount unmountOnExit
+        positioning={{ placement: 'right', offset: { mainAxis: 8 } }}>
+            <Popover.Trigger asChild>
+                <Circle as='button' size='5' bg='colorPalette.solid' color='colorPalette.contrast' colorPalette={color}
+                fontSize='xs' fontWeight='bold' borderWidth='2px' borderColor='page' cursor='pointer' position='relative'
+                _before={{ content: '""', position: 'absolute', inset: '-10px' }}
+                onPointerEnter={hover(true)} onPointerLeave={hover(false)}
+                aria-label={`Usado ${repeats} ${repeats === 1 ? 'vez' : 'veces'} en los últimos 30 días. Ver fechas`}>
+                    {repeats}
+                </Circle>
+            </Popover.Trigger>
+            <Portal>
+                <Popover.Positioner>
+                    <Popover.Content w='auto' bg='gray.900' color='white' borderWidth={0} px={3} py={2} fontSize='sm'
+                    css={{ '--popover-bg': 'colors.gray.900' }}>
+                        <Popover.Arrow><Popover.ArrowTip/></Popover.Arrow>
+                        {dates.map((d, j) => (
+                            <Fragment key={j}>
+                                {parseDate(d)}
+                                <br/>
+                            </Fragment>
+                        ))}
+                    </Popover.Content>
+                </Popover.Positioner>
+            </Portal>
+        </Popover.Root>
     );
 }
 
@@ -77,31 +115,10 @@ export function SongList({ type, songs, onAddSong }: {type: string, songs: Array
 
                 // Uses in the last 30 days, as a notification-style count on the
                 // tag's corner (the tag gets extra end padding so it doesn't cover the name); hidden when 0 (the teal outline already says so).
-                // Hover shows the dates.
+                // Hover, click or tap shows the dates.
                 const usageBadge = repeats > 0 && (
                     <Float placement='top-end' offsetX='1' offsetY='1'>
-                        <Tooltip.Root positioning={{ placement: 'right', offset: { mainAxis: 8 } }} openDelay={0}>
-                            <Tooltip.Trigger asChild>
-                                <Circle size='5' bg='colorPalette.solid' color='colorPalette.contrast' colorPalette={color}
-                                fontSize='xs' fontWeight='bold' borderWidth='2px' borderColor='page' cursor='default'
-                                aria-label={`Usado ${repeats} ${repeats === 1 ? 'vez' : 'veces'} en los últimos 30 días`}>
-                                    {repeats}
-                                </Circle>
-                            </Tooltip.Trigger>
-                            <Portal>
-                                <Tooltip.Positioner>
-                                    <Tooltip.Content>
-                                        <Tooltip.Arrow><Tooltip.ArrowTip/></Tooltip.Arrow>
-                                        {validDates.map((d: Date, j: number) => (
-                                            <Fragment key={j}>
-                                                {parseDate(d)}
-                                                <br/>
-                                            </Fragment>
-                                        ))}
-                                    </Tooltip.Content>
-                                </Tooltip.Positioner>
-                            </Portal>
-                        </Tooltip.Root>
+                        <UsageBadge repeats={repeats} dates={validDates} color={color}/>
                     </Float>
                 );
 

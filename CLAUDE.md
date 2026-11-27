@@ -71,7 +71,7 @@ Local setup steps for humans are in `README.md`.
 - A service is one FullProgram with exactly one Program per type. `NewProgramPage`, `EditProgramPage` and `CurrentProgram` (delete) each make a single `/api/fullprogram` request (`{ id?, date, isCurrent, programs: [{ type, songs: [{ id }], order }] }`), and the handler writes the FullProgram, its Programs and song dates in one `prisma.$transaction`. Publishing (`isCurrent`) clears the flag on every other FullProgram and Program. Pages show an error toast and stay put if the request fails.
 - Each program write also appends/removes the program date in `Song.dates` (`addSongDates`/`removeSongDates` in `lib/programs.ts`). The API reads the stored programs and song dates from the DB, not the client's copy. Removal drops one occurrence, since a song can be in several programs on the same date. If you change program logic, keep `Song.dates` consistent.
 - After mutations, the client does `router.push('/programs/history')` (or `location.reload()` for songs). Data pages use `export const dynamic = 'force-dynamic'`, and Next 16 doesn't keep dynamic pages in the client router cache (`staleTimes.dynamic` is 0), so a push always fetches fresh data. The old `?refresh=true` + `router.refresh()`-during-render workaround (for Next 13's 30s cache) was removed. Keep `force-dynamic` on any page that reads from the DB.
-- Song usage coloring (`SongList`): counts uses in the last 30 days → teal (0), yellow (1), red (2+).
+- Song usage coloring (`SongList`): counts uses in the last 30 days → teal (0), yellow (1), red (2+). The count badge's dates are a popover that opens on mouse hover and on click/tap (Chakra/Ark tooltips never open on touch).
 
 ## Conventions and gotchas
 
