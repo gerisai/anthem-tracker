@@ -63,13 +63,13 @@ export function NewProgramPage({ songs }: { songs: any }) {
   }
 
   return (
-    <Flex color='white' justify="start" align="start" w="100%"
+    <Flex justify="start" align="start" w="100%"
     mx={8} px={8} py={8} direction="row">
-    <Flex color='white' justify="center" align="center" w="50%"
+    <Flex justify="center" align="center" w="50%"
     mx={8} px={8} py={8} direction="column" rounded={6}>
       <SongTabs songs={songs} addProgramSong={addProgramSong}/>
     </Flex>
-    <Flex color='white' alignItems="center" justify="center" w="50%"
+    <Flex alignItems="center" justify="center" w="50%"
     mx={8} px={8} direction="column">
         <ProgramSection title='Recibimiento'>
             <ProgramSongList program={programs.recibimiento} programType='recibimiento' deleteProgramSong={deleteProgramSong}/>
@@ -88,8 +88,8 @@ export function NewProgramPage({ songs }: { songs: any }) {
             <Switch.Root name='isCurrent' colorPalette='yellow' size='lg' my={6}>
               <Switch.HiddenInput/>
               <Switch.Label>Publicar programa?</Switch.Label>
-              {/* The unchecked track defaults to gray.800, the page background */}
-              <Switch.Control bg='gray.600' _checked={{ bg: 'colorPalette.solid' }}/>
+              {/* The unchecked track defaults to the dark page background */}
+              <Switch.Control bg='surface.track' _checked={{ bg: 'colorPalette.solid' }}/>
             </Switch.Root>
         </Flex>
         <Flex direction='row' alignItems="center" wrap="wrap" justify="center" mb={4}>

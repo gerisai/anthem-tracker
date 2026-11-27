@@ -20,9 +20,9 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
 
     return (
     <>
-    <Heading color='white' my={6}>{type}s</Heading>
+    <Heading my={6}>{type}s</Heading>
         <Flex style={ {overflowY: 'scroll', height: '400px' }}>
-        <List.Root variant='plain' color='white' gap={3}>
+        <List.Root variant='plain' gap={3}>
         {
             filteredSongs.map((song: any, i: number) => {
                 const validDates = recentDates(song.dates, now);
@@ -46,9 +46,9 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
                             <Menu.Trigger cursor='pointer'>{songTag}</Menu.Trigger>
                             <Portal>
                                 <Menu.Positioner>
-                                    <Menu.Content background='gray.700' borderColor='gray.500'>
+                                    <Menu.Content background='surface' borderColor='border'>
                                         {PROGRAM_TYPES.map(({ value, label }) => (
-                                            <Menu.Item key={value} value={value} _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong(value, song)}>{label}</Menu.Item>
+                                            <Menu.Item key={value} value={value} _hover={{ bg: 'surface.hover' }} onClick={() => addProgramSong(value, song)}>{label}</Menu.Item>
                                         ))}
                                     </Menu.Content>
                                 </Menu.Positioner>

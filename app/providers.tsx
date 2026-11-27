@@ -4,6 +4,7 @@ import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
 import { ChakraProvider } from '@chakra-ui/react'
 import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider } from 'next-themes'
 import { useServerInsertedHTML } from 'next/navigation'
 import { useState } from 'react'
 import { Toaster } from '@/components/ui/toaster'
@@ -38,8 +39,13 @@ export function Providers({
     <SessionProvider>
       <EmotionCacheProvider>
         <ChakraProvider value={system}>
-          {children}
-          <Toaster/>
+          {/* Puts "light"/"dark" on <html> (Chakra's _light/_dark tokens) and sets
+              color-scheme for native controls. Dark by default, as the app was
+              dark-only; the NavBar switch saves the choice in localStorage. */}
+          <ThemeProvider attribute='class' defaultTheme='dark' enableSystem={false} disableTransitionOnChange>
+            {children}
+            <Toaster/>
+          </ThemeProvider>
         </ChakraProvider>
       </EmotionCacheProvider>
     </SessionProvider>

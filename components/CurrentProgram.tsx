@@ -38,7 +38,7 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
     }
 
     return (
-        <Flex color='white' alignItems="center" justify="center" w="80%"
+        <Flex alignItems="center" justify="center" w="80%"
         mx={8} px={8} direction="column">
             { fullProgramId ?
             <AuthCheck ownerId={author.id}>
