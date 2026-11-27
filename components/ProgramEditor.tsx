@@ -1,13 +1,13 @@
 'use client'
 
-import { Switch, Input, Flex, Button, Text } from '@chakra-ui/react'
+import { Switch, Field, Input, Flex, Button, IconButton, List, Popover, Portal } from '@chakra-ui/react'
 import {
   DndContext, DragOverlay, MouseSensor, TouchSensor, closestCenter, pointerWithin,
   useDroppable, useSensor, useSensors,
   type Active, type Announcements, type CollisionDetection, type DragEndEvent, type DragMoveEvent, type DragStartEvent, type Over,
 } from '@dnd-kit/core';
 import { useState } from 'react';
-import { BiSolidFileBlank, BiRevision } from 'react-icons/bi';
+import { BiBroadcast, BiHelpCircle, BiSolidFileBlank, BiRevision } from 'react-icons/bi';
 import { SongTabs } from '@/components/SongTabs';
 import { SongTag, type DraggedSong } from '@/components/SongList';
 import { ProgramSection } from '@/components/ProgramSection';
@@ -56,6 +56,37 @@ const announcements: Announcements = {
 const screenReaderInstructions = {
   draggable: 'Arrastra el canto a una sección. Con teclado: en el catálogo, 1, 2 o 3 lo añade a Recibimiento, Matutino o Vespertino; en una sección, las flechas arriba y abajo lo reordenan, 1, 2 o 3 lo mueven a otra sección y enter lo quita.',
 };
+
+// How to build a program, behind a ? next to the song tabs. A popover (opens on
+// click/tap), not a tooltip, so it works on touch screens too.
+function EditorHelp() {
+  return (
+    <Popover.Root positioning={{ placement: 'bottom-end' }}>
+      <Popover.Trigger asChild>
+        <IconButton aria-label='Cómo añadir cantos' variant='ghost' size='sm' rounded='full' color='fg.muted'>
+          <BiHelpCircle/>
+        </IconButton>
+      </Popover.Trigger>
+      <Portal>
+        <Popover.Positioner>
+          <Popover.Content maxW='xs' bg='surface' borderColor='border'>
+            <Popover.Arrow><Popover.ArrowTip/></Popover.Arrow>
+            <Popover.Body fontSize='sm'>
+              <Popover.Title fontWeight='semibold' mb={2}>Cómo añadir cantos</Popover.Title>
+              <List.Root gap={1} ps={4}>
+                <List.Item>Arrastra un canto a Recibimiento, Matutino o Vespertino.</List.Item>
+                <List.Item>Dentro de una sección, arrástralo para ordenarlo o llevarlo a otra.</List.Item>
+                <List.Item>Haz clic en un canto de una sección para quitarlo.</List.Item>
+                <List.Item>En pantallas táctiles, mantén presionado para arrastrar.</List.Item>
+                <List.Item>Con teclado: 1, 2 o 3 lo añade o lo mueve; ↑/↓ lo ordena.</List.Item>
+              </List.Root>
+            </Popover.Body>
+          </Popover.Content>
+        </Popover.Positioner>
+      </Portal>
+    </Popover.Root>
+  );
+}
 
 type Dragged = DraggedSong | DraggedProgramSong;
 const fromSection = (d: Dragged): d is DraggedProgramSong => 'from' in d;
@@ -177,10 +208,7 @@ export function ProgramEditor({ songs, programs, addProgramSong, moveProgramSong
     <Flex w="100%" direction={{ base: 'column', lg: 'row' }} align={{ base: 'stretch', lg: 'start' }}
     gap={{ base: 6, lg: 12 }} py={{ base: 2, md: 4 }}>
       <Flex direction="column" w={{ base: '100%', lg: '50%' }} minW={0}>
-        <Text color='fg.muted' fontSize='sm' mb={3}>
-          Arrastra cada canto a Recibimiento, Matutino o Vespertino; dentro de una sección, arrástralo para cambiar su orden o llevarlo a otra sección. En pantallas táctiles, mantén presionado el canto para arrastrarlo. Con teclado, enfoca un canto y presiona 1, 2 o 3 (y ↑/↓ para ordenar).
-        </Text>
-        <SongTabs songs={songs} onAddSong={(type, song) => addToSection(type, song, undefined, true)}/>
+        <SongTabs songs={songs} onAddSong={(type, song) => addToSection(type, song, undefined, true)} actions={<EditorHelp/>}/>
       </Flex>
       <Flex direction="column" align="center" w={{ base: '100%', lg: '50%' }} minW={0}>
         {SECTIONS.map(({ type, title }) => (
@@ -192,12 +220,22 @@ export function ProgramEditor({ songs, programs, addProgramSong, moveProgramSong
         <form onSubmit={onSubmit}>
           <Flex direction='column' align="center" gap={6} my={6}>
             <Input defaultValue={defaultDate} name='date' required variant='flushed' size="lg" type="date" w='auto'/>
-            <Switch.Root defaultChecked={defaultIsCurrent} name='isCurrent' colorPalette='yellow' size='lg'>
-              <Switch.HiddenInput/>
-              <Switch.Label>Publicar programa?</Switch.Label>
-              {/* The unchecked track defaults to the dark page background */}
-              <Switch.Control bg='surface.track' _checked={{ bg: 'colorPalette.solid' }}/>
-            </Switch.Root>
+            {/* Publish toggle: the Field wires the helper text to the switch (aria-describedby) */}
+            <Field.Root w='auto' alignItems='center' gap={1}>
+              <Switch.Root defaultChecked={defaultIsCurrent} name='isCurrent' colorPalette='yellow' size='lg'>
+                <Switch.HiddenInput/>
+                {/* The unchecked track defaults to the dark page background */}
+                <Switch.Control bg='surface.track' _checked={{ bg: 'colorPalette.solid' }}>
+                  <Switch.Thumb>
+                    <Switch.ThumbIndicator fallback={<BiBroadcast color='gray'/>}>
+                      <BiBroadcast color='#975a16'/>
+                    </Switch.ThumbIndicator>
+                  </Switch.Thumb>
+                </Switch.Control>
+                <Switch.Label fontWeight='semibold'>Publicar</Switch.Label>
+              </Switch.Root>
+              <Field.HelperText textAlign='center'>Se mostrará como el programa principal</Field.HelperText>
+            </Field.Root>
             <Flex wrap="wrap" justify="center" gap={4}>
               <Button size='lg' colorPalette='green' loading={isLoading} type='submit'><BiSolidFileBlank/> Guardar</Button>
               <Button size='lg' colorPalette='yellow' onClick={onReset}><BiRevision/> {resetLabel}</Button>
