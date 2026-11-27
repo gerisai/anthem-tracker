@@ -52,7 +52,7 @@ Local setup steps for humans are in `README.md`.
   - `api/fullprogram` (POST/PUT/DELETE a whole service) and `api/song` (POST; accepts only `name`, `type` ∈ himno/salmo/canto and optional `number`, 400 otherwise) — route handlers called from client components via `fetch`
   - `api/auth/[...nextauth]/route.ts` — exports `authOptions` (imported by other routes/pages)
 - `components/` — client components (`'use client'`) that hold the actual UI; pages are thin server components that query Prisma and pass data as props
-- `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload), `recentDates` (last-30-days usage for `SongList`)
+- `lib/Utils.ts` — client-safe helpers: sort functions per song type, date formatting, month names, repeat colors, emoji numbers, `toProgramInputs` (builds the `/api/fullprogram` payload), `recentDates` (last-30-days usage for `SongList`), `groupByMonth` (history sections by year + month)
 - `lib/useProgramSongs.ts` — state hook for the new/edit service pages; `addSong`/`removeSong` are pure (never mutate state, so reset works)
 - `lib/programs.ts` — server-side program helpers used inside transactions: `addSongDates`, `removeSongDates`, `clearCurrent`, `PROGRAM_TYPES`
 - `prisma/` — `schema.prisma`, `migrations/` (baseline `0_init` = schema as of Nov 2026), `seed.ts`, `data.js` (the hymnal catalog: ~280 himnos, ~40 salmos, ~30 cantos)
@@ -78,5 +78,5 @@ Local setup steps for humans are in `README.md`.
 - Permissions live in `lib/permissions.ts` (client-safe, shared by API and UI): `canCreate(user)` (editor/admin create services and songs) and `canModify(user, ownerId)` (admins any service; editors only where `FullProgram.userId` is theirs). APIs return `forbidden()` (403) and `notFound()` (404); `/api/fullprogram` PUT/DELETE check via `checkCanModify` before the transaction. Protected pages redirect (`/programs/current/new` needs `canCreate`, `[id]/edit` needs `canModify`). `<AuthCheck editor>` and `<AuthCheck ownerId={...}>` hide controls the user can't use. Editing keeps the original author on the FullProgram and its Programs.
 - `getCurrentUser()` looks up the user by `session.user.id`; the NextAuth `session` callback adds `id` and `role` (typed in `types/next-auth.d.ts`). Sessions use the database strategy (Prisma adapter), so the callback receives the DB `user`.
 - Each API handler runs all its writes in one `prisma.$transaction`; keep multi-step writes inside it.
-- Dates come from `<input type="date">` (UTC midnight); `parseDate` formats as `DD-MM-YYYY`.
+- Dates come from `<input type="date">` (UTC midnight); `parseDate` formats as `DD-MM-YYYY` from the ISO (UTC) string. Always use UTC getters (`getUTCMonth`, `getUTCFullYear`) on these dates: local getters shift them a day back in the Americas, and the server renders in UTC while the browser doesn't. `tests/lib/utils.test.ts` runs with `TZ=America/Mexico_City` to catch this.
 - `package-lock.json` must stay in sync with `package.json` (`npm ci` fails otherwise). Use npm on Node 26.

@@ -66,3 +66,24 @@ export const RECENT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 export function recentDates(dates: Date[], now: number) {
     return dates.filter((d) => d.getTime() > now - RECENT_WINDOW_MS);
 }
+
+// Groups services by month, oldest first. Uses UTC, like the stored dates
+// (UTC midnight) and parseDate, so the month never shifts with the time zone.
+export function groupByMonth<T extends { date: Date | string }>(programs: T[]) {
+    const sorted = [...programs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const groups: { key: string, label: string, programs: T[] }[] = [];
+
+    for (const program of sorted) {
+        const d = new Date(program.date);
+        const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+        const last = groups[groups.length - 1];
+
+        if (last && last.key === key) {
+            last.programs.push(program);
+        } else {
+            groups.push({ key, label: `${monthsToNames[d.getUTCMonth()]} ${d.getUTCFullYear()}`, programs: [program] });
+        }
+    }
+
+    return groups;
+}
