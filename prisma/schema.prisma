@@ -5,9 +5,14 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// url: what the app uses (in production, Neon's pooled connection).
+// directUrl: what Prisma Migrate uses. Migrations need a direct, non-pooled
+// connection: the pooler runs in transaction mode, which breaks migrate's
+// session-level advisory lock.
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 

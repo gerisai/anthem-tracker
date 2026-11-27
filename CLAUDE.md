@@ -32,7 +32,7 @@ Local setup steps for humans are in `README.md`.
 
 ## Environment variables
 
-`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings.
+`.env.example` documents them all; local values go in `.env` (gitignored; Prisma's CLI only reads `.env`, not `.env.local`): `DATABASE_URL`, `DIRECT_URL`, `SHADOW_DATABASE_URL`, `TEST_DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GITHUB_ID`, `GITHUB_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Production values live in Vercel project settings. In production `DATABASE_URL` is Neon's **pooled** connection (app runtime) and `DIRECT_URL` is the **direct** one (Prisma Migrate only, via `directUrl` in `schema.prisma`; the pooler's transaction mode breaks migrate's advisory lock). `DIRECT_URL` is only needed for Production (previews don't migrate); `vercel-build.sh` fails a production build without it. Anything that runs migrations against another database (like `tests/global-setup.ts`) must override `DIRECT_URL` too, or Prisma falls back to `.env`'s.
 
 ## Testing
 

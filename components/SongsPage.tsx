@@ -4,7 +4,7 @@ import { Flex, Tabs, TabList, Tab, TabPanels, TabPanel, Button, useDisclosure } 
 import { SongList } from '@/components/SongList';
 import { NewSong } from '@/components/NewSong';
 import { BiPlus } from 'react-icons/bi';
-import { LegacyRef, useRef } from 'react';
+import { useRef } from 'react';
 import AuthCheck from '@/components/AuthCheck';
 
 export function SongsPage({ songs }: { songs: any }) {

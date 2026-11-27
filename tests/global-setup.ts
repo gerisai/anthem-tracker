@@ -6,7 +6,8 @@ export default function setup() {
   const url = testDatabaseUrl();
 
   execSync('npx prisma migrate deploy', {
-    env: { ...process.env, DATABASE_URL: url, SHADOW_DATABASE_URL: url },
+    // Override every URL Prisma reads, or migrate would fall back to .env's dev database
+    env: { ...process.env, DATABASE_URL: url, DIRECT_URL: url, SHADOW_DATABASE_URL: url },
     stdio: 'pipe',
   });
 }
