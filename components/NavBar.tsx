@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 import { Flex, HStack, Button, Heading } from '@chakra-ui/react'
 import AuthCheck from '@/components/AuthCheck'
 import { SignInButton, SignOutButton } from '@/components/SessionButtons'
-import { ColorModeSwitch } from '@/components/ColorModeSwitch'
 
 const LINKS = [
     { href: '/programs/current', label: 'Programas', match: (p: string) => p.startsWith('/programs/current') },
@@ -25,7 +24,6 @@ export function NavBar() {
         <Flex align="center" justify="space-between" order={{ base: 0, md: 1 }}>
             <Heading size="md" hideFrom="md" truncate minW={0} mr={2}>Programación de Cantos</Heading>
             <HStack gap={{ base: 2, md: 4 }}>
-                <ColorModeSwitch/>
                 <SignInButton/>
                 <AuthCheck>
                     <SignOutButton/>

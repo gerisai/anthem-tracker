@@ -8,6 +8,7 @@ import { ThemeProvider } from 'next-themes'
 import { useServerInsertedHTML } from 'next/navigation'
 import { useState } from 'react'
 import { Toaster } from '@/components/ui/toaster'
+import { ColorModeButton } from '@/components/ColorModeButton'
 import { system } from './theme'
 
 // Emotion cache for the App Router: styles rendered on the server are collected
@@ -41,10 +42,11 @@ export function Providers({
         <ChakraProvider value={system}>
           {/* Puts "light"/"dark" on <html> (Chakra's _light/_dark tokens) and sets
               color-scheme for native controls. Dark by default, as the app was
-              dark-only; the NavBar switch saves the choice in localStorage. */}
+              dark-only; ColorModeButton saves the choice in localStorage. */}
           <ThemeProvider attribute='class' defaultTheme='dark' enableSystem={false} disableTransitionOnChange>
             {children}
             <Toaster/>
+            <ColorModeButton/>
           </ThemeProvider>
         </ChakraProvider>
       </EmotionCacheProvider>

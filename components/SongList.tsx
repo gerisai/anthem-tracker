@@ -1,6 +1,6 @@
 'use client'
 
-import { Flex, Heading, List, Badge, Tag, Menu, Tooltip, Portal } from "@chakra-ui/react";
+import { Box, Circle, Flex, Float, Heading, List, Badge, Tag, Menu, Tooltip, Portal } from "@chakra-ui/react";
 import { Fragment, useState } from 'react';
 import { parseDate, recentDates, repeatColors, sortFns } from '@/lib/Utils';
 
@@ -22,7 +22,8 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
     <>
     <Heading size={{ base: '2xl', md: '3xl' }} my={{ base: 4, md: 6 }}>{type}s</Heading>
         <Flex overflowY='auto' h={{ base: '60vh', lg: '400px' }} w='100%'>
-        <List.Root variant='plain' gap={3} w='100%'>
+        {/* Top/end padding leaves room for the usage badges, which overhang their tags */}
+        <List.Root variant='plain' gap={3} w='100%' pt={2} pe={3}>
         {
             filteredSongs.map((song: any, i: number) => {
                 const validDates = recentDates(song.dates, now);
@@ -31,19 +32,51 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
                 const color = repeatColors[repeats] || 'red';
 
                 const songTag = (
-                    <Tag.Root size='lg' borderRadius='full' variant='outline' colorPalette={color} mx={1} maxW='none'>
+                    <Tag.Root size='lg' borderRadius='full' variant='outline' colorPalette={color} maxW='100%'
+                    pe={repeats > 0 ? 4 : undefined}>
                         <Badge colorPalette={color} mr={2}>{song.number || i + 1}</Badge>
                         {/* v3 clamps tag labels to one truncated line; show full names as v2 did */}
                         <Tag.Label lineClamp='unset'>{song.name}</Tag.Label>
                     </Tag.Root>
                 );
 
+                // Uses in the last 30 days, as a notification-style count on the
+                // tag's corner (the tag gets extra end padding so it doesn't cover the name); hidden when 0 (the teal outline already says so).
+                // Hover shows the dates.
+                const usageBadge = repeats > 0 && (
+                    <Float placement='top-end' offsetX='1' offsetY='1'>
+                        <Tooltip.Root positioning={{ placement: 'right', offset: { mainAxis: 8 } }} openDelay={0}>
+                            <Tooltip.Trigger asChild>
+                                <Circle size='5' bg='colorPalette.solid' color='colorPalette.contrast' colorPalette={color}
+                                fontSize='xs' fontWeight='bold' borderWidth='2px' borderColor='page' cursor='default'
+                                aria-label={`Usado ${repeats} ${repeats === 1 ? 'vez' : 'veces'} en los últimos 30 días`}>
+                                    {repeats}
+                                </Circle>
+                            </Tooltip.Trigger>
+                            <Portal>
+                                <Tooltip.Positioner>
+                                    <Tooltip.Content>
+                                        <Tooltip.Arrow><Tooltip.ArrowTip/></Tooltip.Arrow>
+                                        {validDates.map((d: Date, j: number) => (
+                                            <Fragment key={j}>
+                                                {parseDate(d)}
+                                                <br/>
+                                            </Fragment>
+                                        ))}
+                                    </Tooltip.Content>
+                                </Tooltip.Positioner>
+                            </Portal>
+                        </Tooltip.Root>
+                    </Float>
+                );
+
                 return (
-                    <List.Item key={song.id} alignItems='center'>
+                    <List.Item key={song.id}>
+                    <Box position='relative' display='inline-flex' maxW='100%'>
                     {
                         addProgramSong ?
                         <Menu.Root>
-                            <Menu.Trigger cursor='pointer'>{songTag}</Menu.Trigger>
+                            <Menu.Trigger cursor='pointer' maxW='100%'>{songTag}</Menu.Trigger>
                             <Portal>
                                 <Menu.Positioner>
                                     <Menu.Content background='surface' borderColor='border'>
@@ -57,26 +90,8 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
                         :
                         songTag
                     }
-                    <Tooltip.Root positioning={{ placement: 'right', offset: { mainAxis: 8 } }} openDelay={0} disabled={repeats === 0}>
-                        <Tooltip.Trigger asChild>
-                            <Tag.Root size='lg' borderRadius='full' variant='solid' colorPalette={color} mx={1}>
-                                <Badge colorPalette={color}>{repeats || 0}</Badge>
-                            </Tag.Root>
-                        </Tooltip.Trigger>
-                        <Portal>
-                            <Tooltip.Positioner>
-                                <Tooltip.Content>
-                                    <Tooltip.Arrow><Tooltip.ArrowTip/></Tooltip.Arrow>
-                                    {validDates.map((d: Date, j: number) => (
-                                        <Fragment key={j}>
-                                            {parseDate(d)}
-                                            <br/>
-                                        </Fragment>
-                                    ))}
-                                </Tooltip.Content>
-                            </Tooltip.Positioner>
-                        </Portal>
-                    </Tooltip.Root>
+                    {usageBadge}
+                    </Box>
                     </List.Item>
                 )
             })
