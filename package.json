@@ -16,7 +16,8 @@
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "db:setup": "prisma migrate deploy && prisma db seed",
-    "dev:login": "tsx --env-file=.env scripts/dev-login.ts"
+    "dev:login": "tsx --env-file=.env scripts/dev-login.ts",
+    "user:role": "tsx --env-file-if-exists=.env scripts/user-role.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

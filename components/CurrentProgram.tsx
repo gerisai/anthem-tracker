@@ -38,20 +38,20 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
     return (
         <Flex color='white' alignItems="center" justify="center" w="80%"
         mx={8} px={8} direction="column">
-            <AuthCheck>
-                { fullProgramId ?
-                <>
+            { fullProgramId ?
+            <AuthCheck ownerId={author.id}>
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
                     <Link href={`/programs/history/${fullProgramId}/edit`}><Button colorScheme='yellow' mr={2} leftIcon={<BiPencil/>}>Editar programa</Button></Link>
                     <Button isLoading={isLoading} colorScheme='red' mr={2} leftIcon={<BiTrash/>} onClick={deleteProgram}>Borrar programa</Button>
                 </Flex>
-                </>
-                :
+            </AuthCheck>
+            :
+            <AuthCheck editor>
                 <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
                   <Link href='/programs/current/new'><Button colorScheme='green' mr={2} leftIcon={<BiPlus/>}>Crear programa</Button></Link>
                 </Flex>
-                }
             </AuthCheck>
+            }
             {
                 programs.length === 0 ? 
                 <Heading>No hay programas publicados</Heading>
