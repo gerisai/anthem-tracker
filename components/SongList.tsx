@@ -20,9 +20,9 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
 
     return (
     <>
-    <Heading my={6}>{type}s</Heading>
-        <Flex style={ {overflowY: 'scroll', height: '400px' }}>
-        <List.Root variant='plain' gap={3}>
+    <Heading size={{ base: '2xl', md: '3xl' }} my={{ base: 4, md: 6 }}>{type}s</Heading>
+        <Flex overflowY='auto' h={{ base: '60vh', lg: '400px' }} w='100%'>
+        <List.Root variant='plain' gap={3} w='100%'>
         {
             filteredSongs.map((song: any, i: number) => {
                 const validDates = recentDates(song.dates, now);
@@ -39,7 +39,7 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
                 );
 
                 return (
-                    <List.Item key={song.id}>
+                    <List.Item key={song.id} alignItems='center'>
                     {
                         addProgramSong ?
                         <Menu.Root>
@@ -57,7 +57,7 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
                         :
                         songTag
                     }
-                    <Tooltip.Root positioning={{ placement: 'right', offset: { mainAxis: 20 } }} openDelay={0} disabled={repeats === 0}>
+                    <Tooltip.Root positioning={{ placement: 'right', offset: { mainAxis: 8 } }} openDelay={0} disabled={repeats === 0}>
                         <Tooltip.Trigger asChild>
                             <Tag.Root size='lg' borderRadius='full' variant='solid' colorPalette={color} mx={1}>
                                 <Badge colorPalette={color}>{repeats || 0}</Badge>

@@ -38,29 +38,28 @@ export function CurrentProgram({ programs, fullProgramId, author }: { programs: 
     }
 
     return (
-        <Flex alignItems="center" justify="center" w="80%"
-        mx={8} px={8} direction="column">
+        <Flex alignItems="center" justify="center" w="100%" direction="column" textAlign="center">
             { fullProgramId ?
             <AuthCheck ownerId={author.id}>
-                <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
-                    <Button asChild colorPalette='yellow' mr={2}><NextLink href={`/programs/history/${fullProgramId}/edit`}><BiPencil/> Editar programa</NextLink></Button>
-                    <Button loading={isLoading} colorPalette='red' mr={2} onClick={deleteProgram}><BiTrash/> Borrar programa</Button>
+                <Flex wrap="wrap" justify={{ base: 'center', md: 'start' }} gap={2} mb={{ base: 4, md: 6 }} w="100%" maxW="2xl">
+                    <Button asChild colorPalette='yellow'><NextLink href={`/programs/history/${fullProgramId}/edit`}><BiPencil/> Editar programa</NextLink></Button>
+                    <Button loading={isLoading} colorPalette='red' onClick={deleteProgram}><BiTrash/> Borrar programa</Button>
                 </Flex>
             </AuthCheck>
             :
             <AuthCheck editor>
-                <Flex alignItems="right" direction="row" m={4} rounded={6} w="80%">
-                    <Button asChild colorPalette='green' mr={2}><NextLink href='/programs/current/new'><BiPlus/> Crear programa</NextLink></Button>
+                <Flex wrap="wrap" justify={{ base: 'center', md: 'start' }} gap={2} mb={{ base: 4, md: 6 }} w="100%" maxW="2xl">
+                    <Button asChild colorPalette='green'><NextLink href='/programs/current/new'><BiPlus/> Crear programa</NextLink></Button>
                 </Flex>
             </AuthCheck>
             }
             {
                 programs.length === 0 ?
-                <Heading>No hay programas publicados</Heading>
+                <Heading size={{ base: '2xl', md: '3xl' }}>No hay programas publicados</Heading>
                 :
                 <>
-                <Heading>{ parseDate(programs[0].date) }</Heading>
-                <Heading size='md'>Por: {  author.name }</Heading>
+                <Heading size={{ base: '2xl', md: '3xl' }}>{ parseDate(programs[0].date) }</Heading>
+                <Heading size='md' color='fg.muted' mb={{ base: 2, md: 4 }}>Por: {  author.name }</Heading>
                 <ProgramSection title='Recibimiento'>
                     <CurrentProgramSongList program={programs.filter((program: any) => program.type === 'recibimiento')[0]}/>
                 </ProgramSection>

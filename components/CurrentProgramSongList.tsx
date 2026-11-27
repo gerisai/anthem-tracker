@@ -9,8 +9,8 @@ export function CurrentProgramSongList({ program }:{ program: any }) {
     
     return (
         program.songs.map((song: any, i: number) => (
-            <Flex key={song.id} direction='row' alignItems='center'>
-                <Highlight key={song.id} query={`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`} styles={{ px: '3', py: '1', my:'2', rounded: 'full', bg: 'teal.100', color: 'gray.900' }} >
+            <Flex key={song.id} direction='row' alignItems='center' justify='center'>
+                <Highlight key={song.id} query={`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`} styles={{ display: 'inline-block', px: '3', py: '1', my: '1', rounded: 'full', bg: 'teal.100', color: 'gray.900' }} >
                     {`${numberToEmoji(i+1)} ${song.number || ''} ${song.name}`}
                 </Highlight>
             </Flex>

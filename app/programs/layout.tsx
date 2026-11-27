@@ -11,7 +11,9 @@ export default function ProgramsLayout({
     return (
       <>
       <NavBar/>
-      <Flex align="center" justify="center" w="100%">
+      {/* Page container: pages fill its width, it sets the side gutter */}
+      <Flex as="main" direction="column" align="center" w="100%" maxW="7xl" mx="auto"
+      px={{ base: 4, md: 8 }} pb={{ base: 8, md: 12 }}>
         {children}
       </Flex>
       </>
