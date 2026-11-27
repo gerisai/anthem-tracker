@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupByMonth, recentDates, RECENT_WINDOW_MS } from '@/lib/Utils';
+import { groupByMonth, groupByYear, recentDates, RECENT_WINDOW_MS } from '@/lib/Utils';
 
 // UTC-6: a date stored as UTC midnight is the previous day in local time, which
 // is what used to put December 1 under "Noviembre"
@@ -38,6 +38,34 @@ describe('groupByMonth', () => {
 
   it('accepts dates as strings', () => {
     expect(groupByMonth([{ id: 'a', date: '2026-01-04T00:00:00.000Z' }])[0].label).toBe('Enero 2026');
+  });
+});
+
+describe('groupByYear', () => {
+  it('puts the newest year first, its months and services in calendar order', () => {
+    const years = groupByYear([
+      service('a', '2025-03-02'),
+      service('b', '2026-01-04'),
+      service('c', '2026-11-08'),
+      service('d', '2026-11-01'),
+      service('e', '2025-12-28'),
+    ]);
+
+    expect(years.map((y) => [y.year, y.count, y.months.map((m) => m.month)])).toEqual([
+      [2026, 3, ['Enero', 'Noviembre']],
+      [2025, 2, ['Marzo', 'Diciembre']],
+    ]);
+    expect(years[0].months[1].programs.map((p) => p.id)).toEqual(['d', 'c']);
+  });
+
+  it('uses the stored UTC year, not the local time zone', () => {
+    const years = groupByYear([service('a', '2026-01-01')]);
+
+    expect(years.map((y) => [y.year, y.months[0].month])).toEqual([[2026, 'Enero']]);
+  });
+
+  it('returns nothing for no services', () => {
+    expect(groupByYear([])).toEqual([]);
   });
 });
 

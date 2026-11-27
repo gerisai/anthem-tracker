@@ -12,9 +12,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // Dark-only app: "dark" turns on Chakra's dark tokens, colorScheme makes
-    // native controls (date picker, scrollbars) dark too
-    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
+    // next-themes sets the "light"/"dark" class and color-scheme on <html>
+    // before hydration, so React must not warn about them
+    <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
           {children}

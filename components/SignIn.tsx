@@ -18,9 +18,9 @@ export default function SignIn({ providers }: { providers: any}){
     }
 
     return (
-    <Flex height="100vh" alignItems="center" justifyContent="center">
-        <Flex direction="column" background="gray.700" p={12} rounded={6}>
-            <Heading color="white" mb={6}>Iniciar Sesión</Heading>
+    <Flex minH="100dvh" alignItems="center" justifyContent="center" px={4}>
+        <Flex direction="column" background="surface" p={{ base: 6, md: 12 }} rounded="lg" shadow="sm" w="100%" maxW="sm">
+            <Heading mb={6}>Iniciar Sesión</Heading>
             {
                 Object.values(providers).map((provider: any) => (
                     <Button 

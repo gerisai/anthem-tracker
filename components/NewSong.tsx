@@ -48,7 +48,7 @@ export function NewSong({ isOpen, onClose, btnRef }: { isOpen: boolean, onClose:
         <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
-        <Drawer.Content asChild background='gray.700' color='white'>
+        <Drawer.Content asChild background='surface'>
           <form onSubmit={createSong}>
           <Drawer.Header>
             <Drawer.Title>Nuevo canto</Drawer.Title>

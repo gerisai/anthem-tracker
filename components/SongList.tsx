@@ -1,17 +1,96 @@
 'use client'
 
-import { Flex, Heading, List, Badge, Tag, Menu, Tooltip, Portal } from "@chakra-ui/react";
+import { Box, Circle, Flex, Float, Heading, List, Badge, Tag, Popover, Portal } from "@chakra-ui/react";
+import { useDraggable } from '@dnd-kit/core';
 import { Fragment, useState } from 'react';
 import { parseDate, recentDates, repeatColors, sortFns } from '@/lib/Utils';
 
-const PROGRAM_TYPES = [
-    { value: 'recibimiento', label: 'Recibimiento' },
-    { value: 'matutino', label: 'Matutino' },
-    { value: 'vespertino', label: 'Vespertino' },
-];
+// What a dragged song carries to the drop handler (ProgramEditor) and its overlay
+export type DraggedSong = { song: any, number: number | string, color: string };
 
-// With `addProgramSong`, clicking a song opens a menu to add it to a program
-export function SongList({ type, songs, addProgramSong }: {type: string, songs: Array<any>, addProgramSong?: (programType: string, song: any) => void }) {
+// A catalog song: its number and name, outlined in its usage color
+export function SongTag({ song, number, color, extraEnd, ...rest }: DraggedSong & { extraEnd?: boolean } & Tag.RootProps) {
+    return (
+        <Tag.Root size='lg' borderRadius='full' variant='outline' colorPalette={color} maxW='100%'
+        pe={extraEnd ? 4 : undefined} {...rest}>
+            <Badge colorPalette={color} mr={2}>{number}</Badge>
+            {/* v3 clamps tag labels to one truncated line; show full names as v2 did */}
+            <Tag.Label lineClamp='unset'>{song.name}</Tag.Label>
+        </Tag.Root>
+    );
+}
+
+// Uses in the last 30 days, as a small count on a song's corner. Its dates open
+// in a popover on hover (mouse) and on click/tap (touch, where tooltips never
+// open). A popover rather than a tooltip: it also closes on an outside tap or
+// Escape. The ::before widens the tap target past the 20px circle.
+function UsageBadge({ repeats, dates, color }: { repeats: number, dates: Date[], color: string }) {
+    const [open, setOpen] = useState(false);
+    const hover = (next: boolean) => (e: React.PointerEvent) => { if (e.pointerType === 'mouse') setOpen(next); };
+
+    return (
+        <Popover.Root open={open} onOpenChange={(e) => setOpen(e.open)} autoFocus={false} lazyMount unmountOnExit
+        positioning={{ placement: 'right', offset: { mainAxis: 8 } }}>
+            <Popover.Trigger asChild>
+                <Circle as='button' size='5' bg='colorPalette.solid' color='colorPalette.contrast' colorPalette={color}
+                fontSize='xs' fontWeight='bold' borderWidth='2px' borderColor='page' cursor='pointer' position='relative'
+                _before={{ content: '""', position: 'absolute', inset: '-10px' }}
+                onPointerEnter={hover(true)} onPointerLeave={hover(false)}
+                aria-label={`Usado ${repeats} ${repeats === 1 ? 'vez' : 'veces'} en los últimos 30 días. Ver fechas`}>
+                    {repeats}
+                </Circle>
+            </Popover.Trigger>
+            <Portal>
+                <Popover.Positioner>
+                    <Popover.Content w='auto' bg='gray.900' color='white' borderWidth={0} px={3} py={2} fontSize='sm'
+                    css={{ '--popover-bg': 'colors.gray.900' }}>
+                        <Popover.Arrow><Popover.ArrowTip/></Popover.Arrow>
+                        {dates.map((d, j) => (
+                            <Fragment key={j}>
+                                {parseDate(d)}
+                                <br/>
+                            </Fragment>
+                        ))}
+                    </Popover.Content>
+                </Popover.Positioner>
+            </Portal>
+        </Popover.Root>
+    );
+}
+
+// Keys that add the focused song to a section without dragging
+const SECTION_KEYS: Record<string, string> = { '1': 'recibimiento', '2': 'matutino', '3': 'vespertino' };
+
+// Drag handle around a SongTag (new/edit service pages). Mouse drags start after
+// moving a few pixels; touch drags after a press-and-hold, so the list still
+// scrolls (sensors in ProgramEditor). The original stays in place, faded, while
+// a DragOverlay copy follows the pointer out of the scrolling list. Keyboard:
+// focus the song and press 1/2/3.
+function DraggableSong({ data, onAddSong, children }: { data: DraggedSong, onAddSong: (programType: string, song: any) => void, children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: data.song.id, data });
+
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        const type = SECTION_KEYS[e.key];
+        if (type) {
+            e.preventDefault();
+            onAddSong(type, data.song);
+        }
+    };
+
+    return (
+        <Box ref={setNodeRef} {...listeners} {...attributes} onKeyDown={onKeyDown} aria-roledescription='canto arrastrable'
+        cursor={isDragging ? 'grabbing' : 'grab'} opacity={isDragging ? 0.4 : 1} maxW='100%'
+        userSelect='none' css={{ WebkitTouchCallout: 'none' }} rounded='full'
+        _focusVisible={{ outline: '2px solid', outlineColor: 'teal.solid', outlineOffset: '2px' }}>
+            {children}
+        </Box>
+    );
+}
+
+// With `onAddSong`, songs can be dragged onto a section of the service being
+// edited (the DndContext lives in ProgramEditor) or added with 1/2/3; without
+// it, the list is read-only
+export function SongList({ type, songs, onAddSong }: {type: string, songs: Array<any>, onAddSong?: (programType: string, song: any) => void }) {
     const filteredSongs = songs.filter((song) => song.type === type.toLowerCase());
 
     filteredSongs.sort(sortFns[type.toLowerCase()]);
@@ -20,9 +99,10 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
 
     return (
     <>
-    <Heading color='white' my={6}>{type}s</Heading>
-        <Flex style={ {overflowY: 'scroll', height: '400px' }}>
-        <List.Root variant='plain' color='white' gap={3}>
+    <Heading size={{ base: '2xl', md: '3xl' }} my={{ base: 4, md: 6 }}>{type}s</Heading>
+        <Flex overflowY='auto' h={{ base: '60vh', lg: '400px' }} w='100%'>
+        {/* Top/end padding leaves room for the usage badges, which overhang their tags */}
+        <List.Root variant='plain' gap={3} w='100%' pt={2} pe={3}>
         {
             filteredSongs.map((song: any, i: number) => {
                 const validDates = recentDates(song.dates, now);
@@ -30,53 +110,24 @@ export function SongList({ type, songs, addProgramSong }: {type: string, songs: 
 
                 const color = repeatColors[repeats] || 'red';
 
-                const songTag = (
-                    <Tag.Root size='lg' borderRadius='full' variant='outline' colorPalette={color} mx={1} maxW='none'>
-                        <Badge colorPalette={color} mr={2}>{song.number || i + 1}</Badge>
-                        {/* v3 clamps tag labels to one truncated line; show full names as v2 did */}
-                        <Tag.Label lineClamp='unset'>{song.name}</Tag.Label>
-                    </Tag.Root>
+                const data: DraggedSong = { song, number: song.number || i + 1, color };
+                const songTag = <SongTag {...data} extraEnd={repeats > 0}/>;
+
+                // Uses in the last 30 days, as a notification-style count on the
+                // tag's corner (the tag gets extra end padding so it doesn't cover the name); hidden when 0 (the teal outline already says so).
+                // Hover, click or tap shows the dates.
+                const usageBadge = repeats > 0 && (
+                    <Float placement='top-end' offsetX='1' offsetY='1'>
+                        <UsageBadge repeats={repeats} dates={validDates} color={color}/>
+                    </Float>
                 );
 
                 return (
                     <List.Item key={song.id}>
-                    {
-                        addProgramSong ?
-                        <Menu.Root>
-                            <Menu.Trigger cursor='pointer'>{songTag}</Menu.Trigger>
-                            <Portal>
-                                <Menu.Positioner>
-                                    <Menu.Content background='gray.700' borderColor='gray.500'>
-                                        {PROGRAM_TYPES.map(({ value, label }) => (
-                                            <Menu.Item key={value} value={value} _hover={{ bg: 'gray.600' }} onClick={() => addProgramSong(value, song)}>{label}</Menu.Item>
-                                        ))}
-                                    </Menu.Content>
-                                </Menu.Positioner>
-                            </Portal>
-                        </Menu.Root>
-                        :
-                        songTag
-                    }
-                    <Tooltip.Root positioning={{ placement: 'right', offset: { mainAxis: 20 } }} openDelay={0} disabled={repeats === 0}>
-                        <Tooltip.Trigger asChild>
-                            <Tag.Root size='lg' borderRadius='full' variant='solid' colorPalette={color} mx={1}>
-                                <Badge colorPalette={color}>{repeats || 0}</Badge>
-                            </Tag.Root>
-                        </Tooltip.Trigger>
-                        <Portal>
-                            <Tooltip.Positioner>
-                                <Tooltip.Content>
-                                    <Tooltip.Arrow><Tooltip.ArrowTip/></Tooltip.Arrow>
-                                    {validDates.map((d: Date, j: number) => (
-                                        <Fragment key={j}>
-                                            {parseDate(d)}
-                                            <br/>
-                                        </Fragment>
-                                    ))}
-                                </Tooltip.Content>
-                            </Tooltip.Positioner>
-                        </Portal>
-                    </Tooltip.Root>
+                    <Box position='relative' display='inline-flex' maxW='100%'>
+                    {onAddSong ? <DraggableSong data={data} onAddSong={onAddSong}>{songTag}</DraggableSong> : songTag}
+                    {usageBadge}
+                    </Box>
                     </List.Item>
                 )
             })
